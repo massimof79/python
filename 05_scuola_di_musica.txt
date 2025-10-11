@@ -1,0 +1,3 @@
+#Scrivi un programma Python che consenta la registrazione delle iscrizioni di studenti ad una scuola di musica. 
+Realizzare un menù con le seguenti funzioni: 1) Aggiungi pagamento 2) Mostra tutti i pagamenti 3) 
+Ricerca pagamento per cognome 4) Calcola il totale incassato

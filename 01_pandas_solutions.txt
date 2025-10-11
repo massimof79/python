@@ -1,0 +1,103 @@
+# Esercizio: Analisi dei Dati sul Cambiamento Climatico con Pandas
+
+## Contesto
+Sei un data analyst che lavora per un'agenzia ambientale. Ti viene chiesto di analizzare i dati sulle temperature globali e le emissioni di CO₂ per creare un report informativo.
+
+## Dataset di Partenza
+
+### Dataset 1: Temperature globali (1990-2023)
+
+```python
+import pandas as pd
+import numpy as np
+
+# Crea il DataFrame delle temperature
+temperature = {
+    'Anno': range(1990, 2024),
+    'Temperatura': np.random.uniform(14.2, 15.1, 34),
+    'Anomalia': np.random.uniform(0.3, 1.2, 34),
+    'Continente': np.random.choice(['Europa', 'Asia', 'America', 'Africa', 'Oceania'], 34)
+}
+df_temp = pd.DataFrame(temperature)
+```
+
+### Dataset 2: Emissioni di CO₂ per paese
+
+```python
+emissioni = {
+    'Paese': ['Cina', 'USA', 'India', 'Russia', 'Giappone', 'Germania', 'Iran', 'Indonesia'],
+    'CO2_milioni_ton': [10065, 5416, 2654, 1711, 1162, 759, 720, 615],
+    'Popolazione_milioni': [1412, 331, 1380, 144, 126, 83, 84, 274],
+    'PIL_procapite': [12556, 69375, 2389, 11654, 39285, 51203, 3877, 4357]
+}
+df_emissioni = pd.DataFrame(emissioni)
+```
+
+### Dataset 3: Energie rinnovabili
+
+```python
+energie_rinnovabili = {
+    'Paese': ['Cina', 'USA', 'Germania', 'Giappone', 'India'],
+    'Percentuale_rinnovabili': [28.8, 20.1, 41.1, 22.4, 24.3]
+}
+df_rinnovabili = pd.DataFrame(energie_rinnovabili)
+```
+
+---
+
+## ESERCIZI
+
+### Parte 1: Creazione e Esplorazione Base
+1. Visualizza le prime 10 righe del DataFrame `df_temp`
+2. Ottieni informazioni sulla struttura del DataFrame (tipi di dati, numero di righe, ecc.)
+3. Calcola le statistiche descrittive per tutte le colonne numeriche
+4. Verifica se ci sono valori mancanti nel DataFrame
+
+### Parte 2: Selezione e Filtro
+5. Seleziona solo la colonna 'Temperatura' dal DataFrame
+6. Seleziona le righe corrispondenti agli anni dal 2010 al 2020
+7. Filtra i dati dove l'anomalia termica è superiore a 0.8°C
+8. Trova gli anni in cui la temperatura ha superato i 14.8°C nel continente Europa
+
+### Parte 3: Ordinamento e Ranking
+9. Ordina il DataFrame per temperatura in ordine decrescente
+10. Trova i 5 anni più caldi utilizzando il metodo appropriato
+11. Crea una nuova colonna 'Ranking' che numera gli anni dal più caldo al più freddo
+
+### Parte 4: Operazioni sui Dati
+12. Calcola le emissioni pro capite (CO₂/popolazione) per il DataFrame `df_emissioni` e crea una nuova colonna chiamata 'Emissioni_procapite'
+13. Aggiungi una colonna 'Categoria' che classifica i paesi in base alle emissioni pro capite:
+    - 'Alto' se emissioni pro capite > 10
+    - 'Medio' se tra 5 e 10
+    - 'Basso' se < 5
+14. Calcola la media delle emissioni totali per ogni categoria
+
+### Parte 5: Raggruppamento e Aggregazione
+15. Torna al DataFrame `df_temp`: raggruppa i dati per Continente e calcola la temperatura media di ogni continente
+16. Per ogni continente, trova l'anno con l'anomalia termica massima
+17. Crea una tabella pivot che mostri l'anomalia media per continente e per decennio:
+    - Decennio 1: 1990-1999
+    - Decennio 2: 2000-2009
+    - Decennio 3: 2010-2019
+    - Decennio 4: 2020-2023
+
+### Parte 6: Join e Merge
+18. Unisci il DataFrame `df_emissioni` con `df_rinnovabili` utilizzando la colonna 'Paese' come chiave
+19. Analizza se esiste una relazione tra la percentuale di energie rinnovabili e le emissioni pro capite
+
+### Parte 7: Pulizia e Trasformazione
+20. Nel DataFrame `df_temp`, sostituisci tutti i valori del continente 'Oceania' con 'Australia-Oceania'
+21. Rimuovi eventuali righe duplicate dal DataFrame
+22. Dopo aver filtrato i dati per un continente specifico, resetta l'indice del DataFrame
+
+---
+
+## Domande di Riflessione
+- Quali continenti mostrano le anomalie termiche più elevate?
+- Esiste una correlazione tra PIL pro capite ed emissioni di CO₂?
+- Come sono cambiate le temperature nell'ultimo decennio (2014-2023) rispetto al primo (1990-1999)?
+
+## Sfide Extra (Opzionali)
+- Esporta i risultati finali in un file CSV
+- Crea una funzione personalizzata usando `.apply()` per categorizzare le temperature
+- Gestisci valori mancanti simulati usando `.fillna()`
