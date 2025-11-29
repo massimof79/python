@@ -1,0 +1,30 @@
+graph TD
+    DS[Dirigente Scolastico]
+    DSGA[DSGA]
+    
+    DS --> RIT[Responsabile IT<br/>Prof. Fedeli Massimo<br/><i>Responsabile Sistemi Informativi</i>]
+    DS --> COIT[Coordinatore IT<br/>Sig. Luzi Mauro<br/><i>Coordinatore Tecnico Operativo</i>]
+    DSGA -.-> COIT
+    
+    RIT -.Indirizzo<br/>strategico.-> COIT
+    
+    COIT --> TEC[Tecnici Informatici /<br/>Assistenti IT<br/><i>Supporto tecnico quotidiano</i>]
+    RIT -.Supervisione<br/>tecnica.-> TEC
+    
+    RIT --> CONS[Consulente Esterno /<br/>Ditta IT<br/><i>Supporto straordinario</i>]
+    
+    RESP[Responsabile<br/>di Laboratorio<br/><i>Rilevazione esigenze didattiche</i>]
+    RIT --> RESP
+    RESP -.Richieste<br/>interventi.-> TEC
+    
+    TEC -.-> SEG[Personale di Segreteria<br/><i>Supporto Amministrativo</i>]
+    COIT -.-> SEG
+    
+    style DS fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style DSGA fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style RIT fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style COIT fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style TEC fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    style CONS fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style SEG fill:#f5f5f5,stroke:#757575,stroke-width:2px
+    style RESP fill:#e0f2f1,stroke:#004d40,stroke-width:2px
