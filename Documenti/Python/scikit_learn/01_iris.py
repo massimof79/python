@@ -14,6 +14,10 @@ Larghezza del sepalo (sepal width in cm)
 Lunghezza del petalo (petal length in cm)
 Larghezza del petalo (petal width in cm)
 
+
+"" Lunghezza e larghezza del sepalo
+"" Lunghezza e larghezza del petalo
+
 Esempio di una riga: [5.1, 3.5, 1.4, 0.2] """
 
 """ y - Il Target (Etichetta)
@@ -31,13 +35,33 @@ print(NomiFiori)
 X = iris.data           #Dati originali
 y = iris.target         #Possibili specie per ogni fiore
 
+print("X")
+print(X)
+print("Y")
+print(y)
+
 # Dividi i dati in training e test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+""" Questo codice serve a suddividere un dataset in due parti: una per l’addestramento e una per il test di un modello di machine learning.
+
+X contiene le feature (le variabili indipendenti)
+y contiene le etichette o valori target
+
+La funzione train_test_split della libreria scikit-learn:
+assegna l’80 percento dei dati al training set (X_train, y_train)
+assegna il 20 percento al test set (X_test, y_test), grazie a test_size=0.2
+mescola i dati in modo casuale prima della divisione
+rende la suddivisione riproducibile grazie a random_state=42 (ogni esecuzione produce la stessa divisione)
+In sintesi:
+il modello  viene addestrato su X_train e y_train, e poi valutato su dati mai visti prima (X_test, y_test), evitando così l’illusione ottica dell’overfitting.
+"""
 
 print("X Train")
 print(X_train)
 
-print("X Train")
+
+print("X Test")
 print(X_test)
 
 print("Y Train")
@@ -47,6 +71,7 @@ print("Y Test")
 print(y_test)
 
 
+exit
 # Crea e addestra il modello
 """ Il random_state è un numero "seme" (seed) che controlla la casualità in scikit-learn. Serve a rendere i risultati riproducibili.
 Perché serve?
@@ -56,6 +81,16 @@ model = DecisionTreeClassifier(random_state=42)
 model.fit(X_train, y_train)
 
 
+""" "Cosa fa il metodo fit()
+"Apprendimento dai dati: Prende in input i dati di addestramento (features X e target y) e calcola i parametri interni del modello (ad es., i coefficienti in una regressione lineare).
+"Costruzione del modello: Memorizza la conoscenza acquisita dai dati, creando un modello pronto per le predizioni.
+"Standardizzazione: È un metodo comune a tutte le classi di scikit-learn (es. LinearRegression, Perceptron, RandomForestClassifier), garantendo un'API uniforme. 
+
+
+"Il metodo predict è il meccanismo con cui un modello di machine learning già addestrato produce una previsione a partire da nuovi dati.
+
+"Predict fa una predizione basata sui dati di test 
+ """
 
 # Fai predizioni sul test set
 y_pred = model.predict(X_test)
@@ -63,6 +98,7 @@ y_pred = model.predict(X_test)
 print("Y Predizione")
 print(y_pred)
 
+""" "Confronta il livello di accuratezza tra i valori in """
 
 # Calcola e stampa l'accuratezza
 accuracy = accuracy_score(y_test, y_pred)
