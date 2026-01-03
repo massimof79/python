@@ -1,295 +1,265 @@
 """
 Sistema di Predizione del Rischio Cardiovascolare
-Programma educativo per studenti - Classificazione binaria
-Versione semplificata con 2 modelli
+Programma educativo per studenti - Versione semplificata
+Usa solo Regressione Logistica
 """
 
 import pandas as pd
 import numpy as np
-import sys
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 # =============================================================================
-# PARTE 1: CARICAMENTO E PREPARAZIONE DEI DATI
+# PARTE 1: CARICAMENTO DEI DATI
 # =============================================================================
 
 def carica_dataset():
     """
-    Carica il dataset delle malattie cardiache da UCI
+    Scarica il dataset delle malattie cardiache da internet
+    Ritorna: DataFrame con i dati dei pazienti
     """
-    print(" Caricamento dataset...")
+    print("Caricamento dataset...")
     
-    # URL del dataset pubblico UCI Heart Disease
+    # URL del dataset pubblico
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data"
     
-    # Nomi delle colonne del dataset
+    # Nomi delle 14 colonne del dataset
     colonne = ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 
                'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 
                'ca', 'thal', 'target']
     
-    # Carica i dati nel dataset
+    # Scarica i dati (il punto interrogativo '?' indica valori mancanti)
     df = pd.read_csv(url, names=colonne, na_values='?')
     
-    # Rimuovi righe con valori mancanti
+    # Elimina le righe con dati mancanti
     df = df.dropna()
     
-    # Converti target in binario (0 = sano, 1 = malattia)
-    # Nel dataset originale: 0=no malattia, 1-4=presenza malattia
+    # Trasforma target in binario: 0 = sano, 1 = malattia
+    # (nel dataset originale: 0=sano, 1-4=vari livelli di malattia)
     df['target'] = (df['target'] > 0).astype(int)
     
-
-    print(df)
-
-    print(f" Dataset caricato: {len(df)} pazienti")
+    # Mostra informazioni sul dataset
+    print(f"Dataset caricato: {len(df)} pazienti")
     print(f"   - Pazienti sani: {(df['target']==0).sum()}")
     print(f"   - Pazienti a rischio: {(df['target']==1).sum()}")
     
     return df
 
-def mostra_statistiche(df):
-    """
-    Mostra statistiche descrittive del dataset
-    """
-    print("\n STATISTICHE DEL DATASET")
-    print("="*60)
-    print(df.describe())
-    print("\n Distribuzione per sesso:")
-    print(df['sex'].value_counts())
-    print("   (1 = Maschio, 0 = Femmina)")
-
 # =============================================================================
-# PARTE 2: ADDESTRAMENTO DEL MODELLO
+# PARTE 2: PREPARAZIONE E ADDESTRAMENTO
 # =============================================================================
 
-def prepara_dati(df):
+def prepara_e_addestra(df):
     """
-    Prepara i dati per l'addestramento
+    Prepara i dati e addestra il modello di Regressione Logistica
+    Ritorna: modello addestrato, scaler, nomi delle features e dati di test
     """
-    print("\n Preparazione dati per l'addestramento...")
+    print("\nPreparazione dati...")
     
-    # Separa features (X) e target (y)
+    # STEP 1: Separa le features (X) dal target (y)
+    # X = tutte le colonne tranne 'target'
+    # y = solo la colonna 'target' (0 o 1)
     X = df.drop('target', axis=1)
     y = df['target']
     
-    # Dividi in training set (80%) e test set (20%)
+    # STEP 2: Dividi in training set (80%) e test set (20%)
+    # training set = per addestrare il modello
+    # test set = per valutare le prestazioni
+    # stratify=y mantiene le stesse proporzioni di sani/malati
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
     
-    # Normalizza i dati (importante per la Regressione Logistica)
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    print(f" Dati preparati:")
     print(f"   - Training set: {len(X_train)} pazienti")
     print(f"   - Test set: {len(X_test)} pazienti")
     
-    return X_train_scaled, X_test_scaled, y_train, y_test, scaler, X_train.columns
+    # STEP 3: Normalizza i dati (porta tutti i valori su scala simile)
+    # Importante: prima calcola media e deviazione standard sul training set
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    # Poi applica la stessa trasformazione al test set
+    X_test_scaled = scaler.transform(X_test)
+    
+    print("\nAddestramento del modello...")
+    print("   Modello: Regressione Logistica")
+    print("   - Calcola la probabilita' che un paziente sia a rischio")
+    print("   - Veloce e interpretabile")
+    
+    # STEP 4: Crea e addestra il modello
+    # max_iter=1000 = numero massimo di iterazioni per l'ottimizzazione
+    # random_state=42 = per risultati riproducibili
+    modello = LogisticRegression(max_iter=1000, random_state=42)
+    modello.fit(X_train_scaled, y_train)
+    
+    # STEP 5: Valuta il modello
+    # Predici sul training set e test set
+    y_pred_train = modello.predict(X_train_scaled)
+    y_pred_test = modello.predict(X_test_scaled)
+    
+    # Calcola l'accuratezza (% di predizioni corrette)
+    acc_train = accuracy_score(y_train, y_pred_train)
+    acc_test = accuracy_score(y_test, y_pred_test)
+    
+    print(f"\nRisultati:")
+    print(f"   - Accuratezza Training: {acc_train:.2%}")
+    print(f"   - Accuratezza Test: {acc_test:.2%}")
+    
+    # Se l'accuratezza sul training è molto più alta del test = overfitting
+    diff = abs(acc_train - acc_test)
+    if diff > 0.10:
+        print(f"   ATTENZIONE: Possibile overfitting: differenza {diff:.2%}")
+    
+    return modello, scaler, X.columns, X_test_scaled, y_test
 
-def addestra_modelli(X_train, X_test, y_train, y_test):
-    """
-    Addestra e confronta Regressione Logistica e Albero Decisionale
-    """
-    print("\n ADDESTRAMENTO DEI MODELLI")
-    print("="*60)
-    
-    # Definisci i due modelli
-    modelli = {
-        'Regressione Logistica': LogisticRegression(max_iter=1000, random_state=42),
-        'Albero Decisionale': DecisionTreeClassifier(max_depth=5, random_state=42)
-    }
-    
-    risultati = {}
-    
-    for nome, modello in modelli.items():
-        print(f"\n Addestramento: {nome}...")
-        
-        # Descrizione del modello
-        if nome == 'Regressione Logistica':
-            print("    Modello statistico che calcola probabilità")
-            print("      Vantaggi: veloce, interpretabile, probabilità calibrate")
-        else:
-            print("    Modello basato su regole decisionali (if-then)")
-            print("      Vantaggi: intuitivo, gestisce relazioni non-lineari")
-        
-        # Addestra il modello
-        modello.fit(X_train, y_train)
-        
-        # Predizioni
-        y_pred_train = modello.predict(X_train)
-        y_pred_test = modello.predict(X_test)
-        
-        # Calcola accuratezza
-        acc_train = accuracy_score(y_train, y_pred_train)
-        acc_test = accuracy_score(y_test, y_pred_test)
-        
-        risultati[nome] = {
-            'modello': modello,
-            'acc_train': acc_train,
-            'acc_test': acc_test,
-            'y_pred': y_pred_test
-        }
-        
-        print(f"    Accuratezza Training: {acc_train:.2%}")
-        print(f"    Accuratezza Test: {acc_test:.2%}")
-    
-    # Confronta i modelli
-    print("\n CONFRONTO TRA I MODELLI")
-    print("="*60)
-    for nome, dati in risultati.items():
-        print(f"{nome}:")
-        print(f"  - Accuratezza Test: {dati['acc_test']:.2%}")
-        print(f"  - Overfitting: {abs(dati['acc_train'] - dati['acc_test']):.2%}")
-    
-    # Scegli il modello migliore
-    modello_migliore = max(risultati.items(), key=lambda x: x[1]['acc_test'])
-    
-    print(f"\n MODELLO MIGLIORE: {modello_migliore[0]}")
-    print(f"   Accuratezza Test: {modello_migliore[1]['acc_test']:.2%}")
-    
-    return risultati, modello_migliore
+# =============================================================================
+# PARTE 3: VALUTAZIONE DETTAGLIATA
+# =============================================================================
 
-def mostra_valutazione(y_test, y_pred, nome_modello):
+def mostra_valutazione(modello, X_test, y_test):
     """
-    Mostra metriche di valutazione dettagliate
+    Mostra metriche di valutazione dettagliate del modello
     """
-    print(f"\n VALUTAZIONE DETTAGLIATA - {nome_modello}")
+    print("\n" + "="*60)
+    print("VALUTAZIONE DETTAGLIATA DEL MODELLO")
     print("="*60)
     
-    # Report di classificazione
-    print("\n Report di Classificazione:")
+    # Predici sul test set
+    y_pred = modello.predict(X_test)
+    
+    # Report di classificazione (precision, recall, f1-score)
+    print("\nReport di Classificazione:")
     print(classification_report(y_test, y_pred, 
                                 target_names=['Sano', 'A Rischio']))
     
     # Matrice di confusione
+    # Mostra quante predizioni corrette/sbagliate per ogni classe
     cm = confusion_matrix(y_test, y_pred)
-    print("\n Matrice di Confusione:")
+    
+    print("\nMatrice di Confusione:")
     print("                  Predetto")
     print("                Sano  A Rischio")
     print(f"Reale Sano      {cm[0][0]:4d}  {cm[0][1]:4d}")
     print(f"      A Rischio {cm[1][0]:4d}  {cm[1][1]:4d}")
     
-    # Spiegazione della matrice
-    print("\n Spiegazione:")
-    print(f"   - Veri Negativi (VN): {cm[0][0]} pazienti sani identificati correttamente")
-    print(f"   - Falsi Positivi (FP): {cm[0][1]} pazienti sani classificati erroneamente a rischio")
-    print(f"   - Falsi Negativi (FN): {cm[1][0]} pazienti a rischio non identificati ⚠️")
-    print(f"   - Veri Positivi (VP): {cm[1][1]} pazienti a rischio identificati correttamente")
+    print("\nInterpretazione:")
+    print(f"   - Veri Negativi: {cm[0][0]} pazienti sani identificati correttamente")
+    print(f"   - Falsi Positivi: {cm[0][1]} pazienti sani classificati erroneamente a rischio")
+    print(f"   - Falsi Negativi: {cm[1][0]} pazienti a rischio NON identificati (PERICOLOSO!)")
+    print(f"   - Veri Positivi: {cm[1][1]} pazienti a rischio identificati correttamente")
 
 # =============================================================================
-# PARTE 3: SISTEMA DI PREDIZIONE PER NUOVI PAZIENTI
+# PARTE 4: PREDIZIONE PER NUOVI PAZIENTI
 # =============================================================================
 
-def predici_rischio_paziente(modello, scaler, feature_names):
+def esempio_predizioni(modello, scaler, feature_names):
     """
-    Sistema interattivo per predire il rischio di un nuovo paziente
-    """
-    print("\n" + "="*60)
-    print(" SISTEMA DI PREDIZIONE RISCHIO CARDIOVASCOLARE")
-    print("="*60)
-    
-    print("\nInserisci i parametri del paziente:\n")
-    
-    # Dizionario per memorizzare i valori
-    paziente = {}
-    
-    # Richiedi input per ogni parametro
-    domande = {
-        'age': "Età (anni): ",
-        'sex': "Sesso (1=Maschio, 0=Femmina): ",
-        'cp': "Tipo dolore toracico (0=tipica, 1=atipica, 2=non-anginosa, 3=asintomatico): ",
-        'trestbps': "Pressione arteriosa a riposo (mmHg): ",
-        'chol': "Colesterolo totale (mg/dl): ",
-        'fbs': "Glicemia a digiuno >120 mg/dl (1=Sì, 0=No): ",
-        'restecg': "ECG a riposo (0=normale, 1=anomalie ST-T, 2=ipertrofia): ",
-        'thalach': "Frequenza cardiaca massima: ",
-        'exang': "Angina da esercizio (1=Sì, 0=No): ",
-        'oldpeak': "Depressione ST (es. 2.3): ",
-        'slope': "Pendenza ST (0-2): ",
-        'ca': "Numero vasi colorati (0-3): ",
-        'thal': "Talassemia (1=normale, 2=difetto fisso, 3=difetto reversibile): "
-    }
-    
-    try:
-        for feature in feature_names:
-            valore = float(input(domande[feature]))
-            paziente[feature] = valore
-        
-        # Crea array per la predizione
-        dati_paziente = np.array([list(paziente.values())])
-        
-        # Normalizza i dati
-        dati_normalizzati = scaler.transform(dati_paziente)
-        
-        # Predici
-        predizione = modello.predict(dati_normalizzati)[0]
-        probabilita = modello.predict_proba(dati_normalizzati)[0]
-        
-        # Mostra risultato
-        print("\n" + "="*60)
-        print(" RISULTATO DELLA PREDIZIONE")
-        print("="*60)
-        
-        if predizione == 0:
-            print(" PAZIENTE A BASSO RISCHIO")
-            print(f"   Probabilità di essere sano: {probabilita[0]:.1%}")
-            print(f"   Probabilità di rischio: {probabilita[1]:.1%}")
-        else:
-            print("   PAZIENTE A RISCHIO")
-            print(f"   Probabilità di malattia cardiovascolare: {probabilita[1]:.1%}")
-            print(f"   Probabilità di essere sano: {probabilita[0]:.1%}")
-        
-        print("\n💡 Nota: Questa è una predizione automatica.")
-        print("   Consultare sempre un medico per una diagnosi definitiva.")
-        
-    except ValueError:
-        print("\n Errore: Inserire valori numerici validi!")
-    except Exception as e:
-        print(f"\n  Errore: {e}")
-
-def esempio_predizione(modello, scaler, feature_names):
-    """
-    Esempio di predizione con dati di test
+    Mostra esempi di predizione con casi tipici
     """
     print("\n" + "="*60)
-    print(" ESEMPI DI PREDIZIONE")
+    print("ESEMPI DI PREDIZIONE")
     print("="*60)
     
-    # Paziente esempio a basso rischio
+    # Esempio 1: Paziente sano (giovane, parametri normali)
     paziente_sano = {
         'age': 45, 'sex': 1, 'cp': 3, 'trestbps': 120, 'chol': 200,
         'fbs': 0, 'restecg': 0, 'thalach': 170, 'exang': 0,
         'oldpeak': 0.0, 'slope': 1, 'ca': 0, 'thal': 2
     }
     
-    # Paziente esempio a rischio
+    # Esempio 2: Paziente a rischio (anziano, parametri alterati)
     paziente_rischio = {
         'age': 65, 'sex': 1, 'cp': 0, 'trestbps': 160, 'chol': 280,
         'fbs': 1, 'restecg': 2, 'thalach': 120, 'exang': 1,
         'oldpeak': 3.5, 'slope': 2, 'ca': 2, 'thal': 3
     }
     
+    # Analizza entrambi i pazienti
     esempi = [
-        ("🟢 Esempio 1: Paziente Sano", paziente_sano),
-        ("🔴 Esempio 2: Paziente a Rischio", paziente_rischio)
+        ("Esempio 1: Paziente con profilo sano", paziente_sano),
+        ("Esempio 2: Paziente con profilo a rischio", paziente_rischio)
     ]
     
-    for nome, paz in esempi:
-        dati = np.array([list(paz.values())])
-        dati_norm = scaler.transform(dati)
-        pred = modello.predict(dati_norm)[0]
-        prob = modello.predict_proba(dati_norm)[0]
+    for nome, paziente in esempi:
+        # Converti il dizionario in DataFrame per mantenere i nomi delle colonne
+        dati_df = pd.DataFrame([paziente], columns=feature_names)
+        # Normalizza i dati (come fatto nel training)
+        dati_norm = scaler.transform(dati_df)
+        # Predici classe e probabilità
+        predizione = modello.predict(dati_norm)[0]
+        probabilita = modello.predict_proba(dati_norm)[0]
         
         print(f"\n{nome}:")
-        print(f"  Parametri chiave: Età={paz['age']}, Colesterolo={paz['chol']}, "
-              f"Pressione={paz['trestbps']}")
-        print(f"  Predizione: {' Sano' if pred == 0 else '  A Rischio'}")
-        print(f"  Probabilità rischio: {prob[1]:.1%}")
+        print(f"  Eta': {paziente['age']} anni, Colesterolo: {paziente['chol']} mg/dl, "
+              f"Pressione: {paziente['trestbps']} mmHg")
+        print(f"  Predizione: {'SANO' if predizione == 0 else 'A RISCHIO'}")
+        print(f"  Probabilita' di rischio: {probabilita[1]:.1%}")
+
+def predici_nuovo_paziente(modello, scaler, feature_names):
+    """
+    Permette di inserire i dati di un nuovo paziente e ottenere una predizione
+    """
+    print("\n" + "="*60)
+    print("PREDIZIONE PER NUOVO PAZIENTE")
+    print("="*60)
+    
+    # Descrizione delle features da inserire
+    descrizioni = {
+        'age': "Eta' del paziente (anni): ",
+        'sex': "Sesso (1=Maschio, 0=Femmina): ",
+        'cp': "Tipo dolore toracico (0-3, 3=asintomatico): ",
+        'trestbps': "Pressione arteriosa a riposo (mmHg, es. 120): ",
+        'chol': "Colesterolo totale (mg/dl, es. 200): ",
+        'fbs': "Glicemia a digiuno >120 mg/dl (1=Si', 0=No): ",
+        'restecg': "ECG a riposo (0=normale, 1-2=anomalie): ",
+        'thalach': "Frequenza cardiaca massima (es. 150): ",
+        'exang': "Angina da esercizio (1=Si', 0=No): ",
+        'oldpeak': "Depressione ST (numero decimale, es. 2.3): ",
+        'slope': "Pendenza ST (0-2): ",
+        'ca': "Numero vasi colorati in fluoroscopia (0-3): ",
+        'thal': "Talassemia (1=normale, 2=difetto fisso, 3=reversibile): "
+    }
+    
+    print("\nInserisci i parametri del paziente:\n")
+    
+    try:
+        # Raccogli i dati del paziente
+        paziente = {}
+        for feature in feature_names:
+            valore = float(input(descrizioni[feature]))
+            paziente[feature] = valore
+        
+        # Prepara i dati per la predizione usando DataFrame
+        # In questo modo manteniamo i nomi delle colonne ed evitiamo il warning
+        dati_paziente_df = pd.DataFrame([paziente], columns=feature_names)
+        dati_normalizzati = scaler.transform(dati_paziente_df)
+        
+        # Esegui la predizione
+        predizione = modello.predict(dati_normalizzati)[0]
+        probabilita = modello.predict_proba(dati_normalizzati)[0]
+        
+        # Mostra il risultato
+        print("\n" + "="*60)
+        print("RISULTATO DELLA PREDIZIONE")
+        print("="*60)
+        
+        if predizione == 0:
+            print("\nPAZIENTE A BASSO RISCHIO")
+            print(f"   Probabilita' di essere sano: {probabilita[0]:.1%}")
+            print(f"   Probabilita' di rischio cardiovascolare: {probabilita[1]:.1%}")
+        else:
+            print("\nPAZIENTE A RISCHIO")
+            print(f"   Probabilita' di malattia cardiovascolare: {probabilita[1]:.1%}")
+            print(f"   Probabilita' di essere sano: {probabilita[0]:.1%}")
+        
+        print("\nIMPORTANTE: Questa e' solo una predizione automatica.")
+        print("   Consultare sempre un medico per una diagnosi definitiva!")
+        
+    except ValueError:
+        print("\nERRORE: Inserire solo valori numerici validi!")
+    except Exception as e:
+        print(f"\nERRORE imprevisto: {e}")
 
 # =============================================================================
 # PROGRAMMA PRINCIPALE
@@ -297,61 +267,47 @@ def esempio_predizione(modello, scaler, feature_names):
 
 def main():
     """
-    Funzione principale del programma
+    Funzione principale che coordina tutto il programma
     """
-    print("\n" + "="*60)
-    print("🏥 SISTEMA DI PREDIZIONE MALATTIE CARDIOVASCOLARI")
-    print("   Versione con 2 modelli: Regressione Logistica e Albero Decisionale")
-    print("="*60)
+    print("\n" + "="*70)
+    print("SISTEMA DI PREDIZIONE RISCHIO MALATTIE CARDIOVASCOLARI")
+    print("   Programma educativo con Regressione Logistica")
+    print("="*70)
     
-    # 1. Carica dataset
+    # PASSO 1: Carica il dataset
     df = carica_dataset()
     
-    mostra_statistiche(df)
-
-    sys.exit()
-
-    # 2. Prepara i dati
-    X_train, X_test, y_train, y_test, scaler, feature_names = prepara_dati(df)
+    # PASSO 2: Prepara i dati e addestra il modello
+    modello, scaler, feature_names, X_test, y_test = prepara_e_addestra(df)
     
-    # 3. Addestra i modelli
-    risultati, (nome_migliore, dati_migliore) = addestra_modelli(
-        X_train, X_test, y_train, y_test
-    )
+    # PASSO 3: Mostra valutazione dettagliata
+    mostra_valutazione(modello, X_test, y_test)
     
-    # 4. Mostra valutazione dettagliata del modello migliore
-    mostra_valutazione(y_test, dati_migliore['y_pred'], nome_migliore)
+    # PASSO 4: Mostra esempi di predizione
+    esempio_predizioni(modello, scaler, feature_names)
     
-    # 5. Modello finale
-    modello_finale = dati_migliore['modello']
-    
-    # 6. Esempi di predizione
-    esempio_predizione(modello_finale, scaler, feature_names)
-    
-    # 7. Menu interattivo
+    # PASSO 5: Menu interattivo
     while True:
         print("\n" + "="*60)
-        print(" MENU OPZIONI")
+        print("MENU OPZIONI")
         print("="*60)
         print("1. Predire rischio per un nuovo paziente")
-        print("2. Mostrare confronto tra i modelli")
-        print("3. Uscire")
+        print("2. Mostrare nuovamente la valutazione del modello")
+        print("3. Uscire dal programma")
         
         scelta = input("\nScegli un'opzione (1-3): ")
         
         if scelta == '1':
-            predici_rischio_paziente(modello_finale, scaler, feature_names)
+            predici_nuovo_paziente(modello, scaler, feature_names)
         elif scelta == '2':
-            print("\n CONFRONTO MODELLI:")
-            for nome, dati in risultati.items():
-                mostra_valutazione(y_test, dati['y_pred'], nome)
+            mostra_valutazione(modello, X_test, y_test)
         elif scelta == '3':
-            print("\n Programma terminato.")
+            print("\nProgramma terminato. Arrivederci!")
             print("="*60)
             break
         else:
-            print("Opzione non valida!") 
+            print("\nERRORE: Opzione non valida! Scegliere 1, 2 o 3.")
 
-# Esegui il programma
+# Punto di ingresso del programma
 if __name__ == "__main__":
     main()
