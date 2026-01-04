@@ -15,6 +15,8 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 # PARTE 1: CARICAMENTO DEI DATI
 # =============================================================================
 
+#Usiamo un modello di Regressione Logistica ovvero basato su una funzione sigmoidale
+
 def carica_dataset():
     """
     Scarica il dataset delle malattie cardiache da internet
@@ -31,13 +33,17 @@ def carica_dataset():
                'ca', 'thal', 'target']
     
     # Scarica i dati (il punto interrogativo '?' indica valori mancanti)
+    #na_values='?'
+    #Dice a pandas di interpretare il carattere ? come valore mancante, cioè NaN.
     df = pd.read_csv(url, names=colonne, na_values='?')
     
     # Elimina le righe con dati mancanti
+    # Rimuove qualsiasi riga che contenga almeno un valore NaN (comportamento predefinito).
     df = df.dropna()
     
     # Trasforma target in binario: 0 = sano, 1 = malattia
     # (nel dataset originale: 0=sano, 1-4=vari livelli di malattia)
+    # se il valore originario nel target <0 allora diventa 0 altrimenti diventa 1
     df['target'] = (df['target'] > 0).astype(int)
     
     # Mostra informazioni sul dataset
@@ -61,6 +67,8 @@ def prepara_e_addestra(df):
     # STEP 1: Separa le features (X) dal target (y)
     # X = tutte le colonne tranne 'target'
     # y = solo la colonna 'target' (0 o 1)
+    # Metto nel dataset X tutto 
+
     X = df.drop('target', axis=1)
     y = df['target']
     
@@ -267,7 +275,7 @@ def predici_nuovo_paziente(modello, scaler, feature_names):
 
 def main():
     """
-    Funzione principale che coordina tutto il programma
+    Funzione principale che gestisce il programma
     """
     print("\n" + "="*70)
     print("SISTEMA DI PREDIZIONE RISCHIO MALATTIE CARDIOVASCOLARI")
