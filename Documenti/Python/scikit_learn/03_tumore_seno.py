@@ -1,8 +1,28 @@
+# Importa un dataset reale già incluso in scikit-learn.
+# In questo caso si tratta del dataset sul tumore al seno,
+# utilizzato per problemi di classificazione binaria.
 from sklearn.datasets import load_breast_cancer
+
+# Importa la funzione per suddividere il dataset in insieme di addestramento
+# (training set) e insieme di test (test set).
 from sklearn.model_selection import train_test_split
+
+# Importa il modello di Regressione Logistica,
+# un classificatore lineare molto usato per problemi di classificazione binaria.
 from sklearn.linear_model import LogisticRegression
+
+# Importa alcune metriche di valutazione:
+# - accuracy_score: percentuale di predizioni corrette
+# - confusion_matrix: matrice di confusione
+# - classification_report: precision, recall e F1-score
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Importa StandardScaler, utilizzato per la standardizzazione delle feature.
+# Porta ogni variabile ad avere media 0 e deviazione standard 1,
+# operazione fondamentale per molti modelli lineari.
 from sklearn.preprocessing import StandardScaler
+
+
 import numpy as np
 import pandas as pd
 
