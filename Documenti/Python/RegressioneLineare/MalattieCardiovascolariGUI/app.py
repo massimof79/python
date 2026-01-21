@@ -13,6 +13,9 @@ from sklearn.linear_model import LogisticRegression
 app = Flask(__name__)
 CORS(app)
 
+""" Flask – un micro-framework leggero per creare applicazioni web in Python.
+Flask-CORS – un’estensione per Flask che gestisce il supporto al Cross-Origin Resource Sharing (CORS). """
+
 # ============================================================
 # CARICAMENTO E ADDESTRAMENTO DEL MODELLO ALL'AVVIO
 # ============================================================
@@ -51,6 +54,7 @@ print("Modello addestrato e pronto!")
 # ENDPOINT API
 # ============================================================
 
+#Rotta per gestire la chiamata post
 @app.route('/predict', methods=['POST'])
 def predict():
     try:

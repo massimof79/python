@@ -1,26 +1,32 @@
 """
 Sistema di Predizione del Rischio Cardiovascolare
-Versione didattica ESSENZIALE
 Algoritmo: Regressione Logistica
 
-L’algoritmo realizza un sistema essenziale di predizione del rischio cardiovascolare basato su tecniche di Machine Learning supervisionato. 
-L’obiettivo è classificare ciascun paziente come sano oppure a rischio di malattia cardiaca, utilizzando un modello di regressione logistica 
-addestrato su dati clinici reali.
+1. L’algoritmo realizza un sistema di predizione del rischio cardiovascolare basato su tecniche di Machine Learning supervisionato. 
+L’obiettivo è classificare ciascun paziente come sano oppure a rischio di malattia cardiaca, 
+utilizzando un modello di regressione logistica addestrato su dati clinici reali.
+
 Il punto di partenza è il caricamento del dataset, che contiene misurazioni cliniche e anagrafiche di pazienti, 
 come età, sesso, pressione sanguigna, colesterolo e risultati di test diagnostici. 
-I dati vengono letti direttamente da una sorgente online e organizzati in un DataFrame. 
+
+2. I dati vengono letti direttamente da una sorgente online e organizzati in un DataFrame. 
 Alcuni valori nel dataset originale sono mancanti e indicati con un simbolo speciale; 
 Questi vengono convertiti in valori nulli e successivamente eliminati per garantire che il modello lavori solo su osservazioni complete. 
 Questa scelta, pur semplice, è funzionale a una versione didattica dell’algoritmo.
 Successivamente, la variabile di interesse, cioè il target, viene trasformata in una forma binaria. 
 
-Nel dataset originale il grado di malattia è espresso con più valori interi; 
+3. Nel dataset originale il grado di malattia è espresso con più valori interi; 
 l’algoritmo li semplifica distinguendo solo tra assenza di malattia e presenza di malattia. 
 In questo modo il problema viene ricondotto a una classificazione binaria, più adatta all’uso della regressione logistica e più semplice da interpretare per chi studia.
 La fase di preparazione dei dati prevede la separazione tra le variabili di input, che descrivono le caratteristiche del paziente, e l’output, che rappresenta lo stato di salute. Il dataset viene poi suddiviso in un insieme di addestramento e uno di test. La suddivisione è effettuata in modo stratificato, così da mantenere proporzioni simili di pazienti sani e malati in entrambe le parti, evitando distorsioni nella valutazione del modello.
-Prima dell’addestramento, i dati vengono standardizzati. 
-Le variabili cliniche hanno infatti scale molto diverse tra loro: alcune sono espresse in anni, altre in milligrammi o in valori discreti. La standardizzazione riporta tutte le feature su una scala comparabile, centrata sulla media e con deviazione standard unitaria. Questo passaggio è particolarmente importante per la regressione logistica, che è sensibile alle differenze di scala tra le variabili.
-L’addestramento del modello avviene tramite regressione logistica, un algoritmo di classificazione che stima la probabilità che un’osservazione appartenga alla classe “a rischio”. Il modello apprende, a partire dai dati di training, un insieme di pesi che quantificano l’influenza di ciascuna variabile clinica sulla probabilità finale di malattia.
+
+4. Prima dell’addestramento, i dati vengono standardizzati. 
+Le variabili cliniche hanno infatti scale molto diverse tra loro: alcune sono espresse in anni, altre in milligrammi o in valori discreti. 
+La standardizzazione riporta tutte le feature su una scala comparabile, centrata sulla media e con deviazione standard unitaria. 
+Questo passaggio è particolarmente importante per la regressione logistica, che è sensibile alle differenze di scala tra le variabili.
+
+5. L’addestramento del modello avviene tramite regressione logistica, un algoritmo di classificazione che stima la probabilità che un’osservazione appartenga alla classe “a rischio”. 
+Il modello apprende, a partire dai dati di training, un insieme di pesi che quantificano l’influenza di ciascuna variabile clinica sulla probabilità finale di malattia.
 Una volta addestrato, il modello viene valutato sui dati di test, cioè su pazienti mai visti durante l’apprendimento. 
 Le previsioni ottenute vengono confrontate con i valori reali per calcolare l’accuratezza, che rappresenta la percentuale di classificazioni corrette. Questa metrica fornisce una prima indicazione dell’efficacia del sistema, pur non esaurendo tutte le possibili valutazioni clinicamente rilevanti.
 
@@ -153,6 +159,10 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
+""" x_standardizzato = (x − μ) / σ
+
+dove μ è la media della variabile e σ è la deviazione standard. Il risultato è una feature con media zero e deviazione standard unitaria.
+ """
 """ print("X Train dopo la trasformazione")
 print(X_train)
 print("X Test dopo la trasformazione")
