@@ -1,4 +1,5 @@
-""" L’algoritmo implementa un semplice sistema di classificazione supervisionata finalizzato a prevedere l’esito di uno studente (promosso o bocciato) 
+""" L’algoritmo implementa un semplice sistema di classificazione supervisionata finalizzato 
+a prevedere l’esito di uno studente (promosso o bocciato) 
 sulla base di tre variabili osservabili: ore di studio settimanali, percentuale di presenza alle lezioni e voto medio conseguito durante l’anno.
 Ogni studente è rappresentato come un vettore numerico di tre componenti, mentre l’etichetta associata è binaria: 1 indica la promozione, 0 la bocciatura.
 
@@ -8,14 +9,14 @@ Questa separazione consente di addestrare il modello su una parte dei dati e di 
 Successivamente viene creato e addestrato un DecisionTreeClassifier. 
 Durante la fase di addestramento, l’albero analizza i dati di training e costruisce una sequenza di regole del tipo “se… allora…”, 
 scegliendo a ogni nodo la variabile e la soglia che meglio separano studenti promossi e bocciati. 
-Il criterio di scelta è basato sulla riduzione dell’impurità (ad esempio indice di Gini), cioè sulla capacità di 
+Il criterio di scelta è basato sulla riduzione dell’impurità cioè sulla capacità di 
 rendere i gruppi risultanti il più possibile omogenei rispetto all’esito finale.
 
 Una volta addestrato, il modello viene utilizzato per:
-effettuare previsioni sugli studenti del test set;
-calcolare l’accuratezza complessiva;
-confrontare, caso per caso, il risultato reale con quello previsto;
-stimare l’esito di un nuovo studente non presente nel dataset iniziale.
+- effettuare previsioni sugli studenti del test set;
+- calcolare l’accuratezza complessiva;
+- confrontare, caso per caso, il risultato reale con quello previsto;
+- stimare l’esito di un nuovo studente non presente nel dataset iniziale.
 
 Il codice, oltre a produrre una misura quantitativa delle prestazioni, è strutturato per rendere leggibile e interpretabile ogni previsione, aspetto cruciale in un contesto educativo.
 
@@ -23,11 +24,13 @@ Per quanto riguarda la scelta dell’albero decisionale, essa è particolarmente
 In primo luogo, il fenomeno modellato è naturalmente decisionale: nella pratica scolastica si ragiona spesso in termini di soglie 
 (“se studi poco e hai molte assenze, allora…”). L’albero replica esattamente questo schema logico, 
 rendendo il modello intuitivo anche per chi non ha competenze avanzate di machine learning.
-In secondo luogo, l’albero decisionale è intrinsecamente interpretabile. O
-gni previsione può essere spiegata seguendo il percorso dai nodi radice alle foglie, 
-mostrando quali condizioni hanno portato alla decisione finale. Questo è un vantaggio decisivo rispetto a modelli più complessi ma opachi, soprattutto in ambito didattico o valutativo.
+In secondo luogo, l’albero decisionale è intrinsecamente interpretabile. 
+Ogni previsione può essere spiegata seguendo il percorso dai nodi radice alle foglie, 
+mostrando quali condizioni hanno portato alla decisione finale. Questo è un vantaggio decisivo rispetto 
+a modelli più complessi ma opachi, soprattutto in ambito didattico o valutativo.
 
-Infine, l’albero non richiede normalizzazione delle variabili, gestisce bene dati eterogenei e funziona correttamente anche con dataset di dimensioni ridotte, come in questo esempio.
+Infine, l’albero non richiede normalizzazione delle variabili, gestisce bene dati eterogenei e funziona 
+correttamente anche con dataset di dimensioni ridotte, come in questo esempio.
 
 La scelta di limitare la profondità dell’albero a 3 livelli non è casuale.
 Un albero troppo profondo tenderebbe a memorizzare i dati di training, 
