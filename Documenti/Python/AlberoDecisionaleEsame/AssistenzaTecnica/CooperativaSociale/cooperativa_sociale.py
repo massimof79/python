@@ -4,45 +4,34 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-# Variabili globali per mantenere in memoria modello ed encoder
+# Variabili globali
 modello = None
 encoder_dict = None
 
 
 def carica_e_prepara_dati(percorso_csv):
-    """
-    Carica il dataset da file CSV e prepara i dati
-    per l'addestramento del modello di Machine Learning.
-    """
-
     df = pd.read_csv(percorso_csv)
 
-    encoder_dict_locale = {}
+    encoder_locali = {}
 
     # Codifica di tutte le colonne categoriali
     for colonna in df.columns:
         le = LabelEncoder()
         df[colonna] = le.fit_transform(df[colonna])
-        encoder_dict_locale[colonna] = le
+        encoder_locali[colonna] = le
 
-    X = df.drop("Priorità", axis=1)
-    y = df["Priorità"]
+    X = df.drop("Esito_richiesta", axis=1)
+    y = df["Esito_richiesta"]
 
-    return X, y, encoder_dict_locale
+    return X, y, encoder_locali
 
 
 def addestra_modello():
-    """
-    Addestra un modello di Decision Tree per la previsione
-    della priorità di una richiesta di assistenza.
-    """
     global modello, encoder_dict
 
     print("\nAddestramento del modello in corso...")
 
-    X, y, encoder_dict = carica_e_prepara_dati(
-        "richieste_assistenza_esteso_plus.csv"
-    )
+    X, y, encoder_dict = carica_e_prepara_dati("richieste_microprestiti.csv")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42
@@ -50,50 +39,49 @@ def addestra_modello():
 
     modello = DecisionTreeClassifier(
         criterion="gini",
-        max_depth=4,
+        max_depth=5,
         random_state=42
     )
 
     modello.fit(X_train, y_train)
 
     y_pred = modello.predict(X_test)
-    accuratezza = accuracy_score(y_test, y_pred)
+    acc = accuracy_score(y_test, y_pred)
 
     print("Modello addestrato correttamente.")
-    print(f"Accuratezza sul test set: {accuratezza:.2f}")
+    print(f"Accuratezza sul test set: {acc:.2f}")
 
 
 def effettua_previsione():
-    """
-    Usa il modello presente in memoria per effettuare
-    una previsione della priorità.
-    """
     global modello, encoder_dict
 
-    if modello is None or encoder_dict is None:
-        print("\nErrore: devi prima addestrare il modello.")
+    if modello is None:
+        print("\nDevi prima addestrare il modello.")
         return
 
-    print("\nInserisci i dati della richiesta:")
+    print("\nInserisci i dati del richiedente:")
 
     dati = {
-        "Tipo_problema": input("Tipo problema (software / hardware / rete): "),
-        "Numero_utenti_coinvolti": input("Numero utenti coinvolti (1 / 2-5 / >5): "),
-        "Impatto_servizio": input("Impatto sul servizio (basso / medio / alto): "),
-        "Urgenza_dichiarata": input("Urgenza dichiarata (bassa / media / alta): ")
+        "Fascia_età": input("Fascia età (18-25 / 26-40 / 41-60 / >60): "),
+        "Situazione_lavorativa": input("Situazione lavorativa: "),
+        "Reddito_mensile": input("Reddito mensile (nessuno / basso / medio / alto): "),
+        "Storico_creditizio": input("Storico creditizio (assente / regolare / ritardi_passati / insolvenze): "),
+        "Importo_richiesto": input("Importo richiesto (molto_basso / basso / medio / alto): "),
+        "Finalità_prestito": input("Finalità prestito (formazione / avvio_attività / acquisto_strumenti / altro): ")
     }
 
     df_input = pd.DataFrame([dati])
 
     for colonna in df_input.columns:
-        df_input[colonna] = encoder_dict[colonna].transform(df_input[colonna])
+        le = encoder_dict[colonna]
+        df_input[colonna] = le.transform(df_input[colonna])
 
     previsione = modello.predict(df_input)
 
-    priorita_decoder = encoder_dict["Priorità"]
-    risultato = priorita_decoder.inverse_transform(previsione)
+    decoder = encoder_dict["Esito_richiesta"]
+    risultato = decoder.inverse_transform(previsione)
 
-    print(f"\nPriorità prevista: {risultato[0]}")
+    print(f"\nEsito previsto della richiesta: {risultato[0]}")
 
 
 def menu():
