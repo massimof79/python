@@ -1,37 +1,43 @@
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # Variabili globali
 modello = None
-encoder_dict = None
+colonne_modello = None  # Colonne generate dal One-Hot Encoding
 
 
 def carica_e_prepara_dati(percorso_csv):
+    """
+    Carica il dataset e applica One-Hot Encoding
+    alle variabili categoriali.
+    """
     df = pd.read_csv(percorso_csv)
 
-    encoder_locali = {}
-
-    # Codifica di tutte le colonne categoriali
-    for colonna in df.columns:
-        le = LabelEncoder()
-        df[colonna] = le.fit_transform(df[colonna])
-        encoder_locali[colonna] = le
-
-    X = df.drop("Esito_richiesta", axis=1)
+    # Separiamo la variabile target
     y = df["Esito_richiesta"]
+    X = df.drop("Esito_richiesta", axis=1)
 
-    return X, y, encoder_locali
+    # Trasformazione delle variabili categoriali in colonne binarie
+    X = pd.get_dummies(X)
+
+    return X, y
 
 
 def addestra_modello():
-    global modello, encoder_dict
+    """
+    Addestra un Decision Tree per prevedere
+    l'esito di una richiesta di microprestito.
+    """
+    global modello, colonne_modello
 
     print("\nAddestramento del modello in corso...")
 
-    X, y, encoder_dict = carica_e_prepara_dati("richieste_microprestiti.csv")
+    X, y = carica_e_prepara_dati("richieste_microprestiti.csv")
+
+    # Salviamo la struttura delle colonne del training
+    colonne_modello = X.columns
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42
@@ -53,9 +59,12 @@ def addestra_modello():
 
 
 def effettua_previsione():
-    global modello, encoder_dict
+    """
+    Effettua una previsione utilizzando il modello addestrato.
+    """
+    global modello, colonne_modello
 
-    if modello is None:
+    if modello is None or colonne_modello is None:
         print("\nDevi prima addestrare il modello.")
         return
 
@@ -72,16 +81,15 @@ def effettua_previsione():
 
     df_input = pd.DataFrame([dati])
 
-    for colonna in df_input.columns:
-        le = encoder_dict[colonna]
-        df_input[colonna] = le.transform(df_input[colonna])
+    # Applichiamo la stessa codifica One-Hot usata nel training
+    df_input = pd.get_dummies(df_input)
+
+    # Riallineamento delle colonne per combaciare con il modello
+    df_input = df_input.reindex(columns=colonne_modello, fill_value=0)
 
     previsione = modello.predict(df_input)
 
-    decoder = encoder_dict["Esito_richiesta"]
-    risultato = decoder.inverse_transform(previsione)
-
-    print(f"\nEsito previsto della richiesta: {risultato[0]}")
+    print(f"\nEsito previsto della richiesta: {previsione[0]}")
 
 
 def menu():

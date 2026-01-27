@@ -1,61 +1,64 @@
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-# Variabili globali per mantenere in memoria modello ed encoder
+# Variabili globali
 modello = None
-encoder_dict = None
+colonne_modello = None  # Servirà per allineare i dati in fase di previsione
 
 
 def carica_e_prepara_dati(percorso_csv):
     """
-    Carica il dataset da file CSV e prepara i dati
-    per l'addestramento del modello di Machine Learning.
+    Carica il dataset e trasforma le variabili categoriali
+    in variabili numeriche tramite One-Hot Encoding.
     """
 
     df = pd.read_csv(percorso_csv)
 
-    encoder_dict_locale = {}
-
-    # Codifica di tutte le colonne categoriali
-    for colonna in df.columns:
-        le = LabelEncoder()
-        df[colonna] = le.fit_transform(df[colonna])
-        encoder_dict_locale[colonna] = le
-
-    X = df.drop("Priorità", axis=1)
+    # Separiamo la variabile target prima della codifica
     y = df["Priorità"]
+    X = df.drop("Priorità", axis=1)
 
-    return X, y, encoder_dict_locale
+
+    print("X prima del coding:", X)
+    # One-Hot Encoding: ogni categoria diventa una colonna binaria (0/1)
+    X = pd.get_dummies(X)
+
+    print("X prima dopo il coding:", X)
+    return X, y
 
 
 def addestra_modello():
     """
-    Addestra un modello di Decision Tree per la previsione
-    della priorità di una richiesta di assistenza.
+    Addestra un Decision Tree per prevedere la priorità
+    delle richieste di assistenza.
     """
-    global modello, encoder_dict
+    global modello, colonne_modello
 
     print("\nAddestramento del modello in corso...")
 
-    X, y, encoder_dict = carica_e_prepara_dati(
-        "richieste_assistenza_esteso_plus.csv"
-    )
+    X, y = carica_e_prepara_dati("richieste_assistenza_esteso_plus.csv")
 
+    # Salviamo le colonne generate dal One-Hot Encoding
+    colonne_modello = X.columns
+
+    # Suddivisione training/test
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42
     )
 
+    # Creazione modello
     modello = DecisionTreeClassifier(
         criterion="gini",
         max_depth=4,
         random_state=42
     )
 
+    # Addestramento
     modello.fit(X_train, y_train)
 
+    # Valutazione
     y_pred = modello.predict(X_test)
     accuratezza = accuracy_score(y_test, y_pred)
 
@@ -65,12 +68,11 @@ def addestra_modello():
 
 def effettua_previsione():
     """
-    Usa il modello presente in memoria per effettuare
-    una previsione della priorità.
+    Effettua una previsione usando il modello già addestrato.
     """
-    global modello, encoder_dict
+    global modello, colonne_modello
 
-    if modello is None or encoder_dict is None:
+    if modello is None or colonne_modello is None:
         print("\nErrore: devi prima addestrare il modello.")
         return
 
@@ -85,18 +87,21 @@ def effettua_previsione():
 
     df_input = pd.DataFrame([dati])
 
-    for colonna in df_input.columns:
-        df_input[colonna] = encoder_dict[colonna].transform(df_input[colonna])
+    # Applichiamo la stessa codifica One-Hot
+    df_input = pd.get_dummies(df_input)
+
+    # Riallineiamo le colonne: eventuali colonne mancanti vengono riempite con 0
+    df_input = df_input.reindex(columns=colonne_modello, fill_value=0)
 
     previsione = modello.predict(df_input)
 
-    priorita_decoder = encoder_dict["Priorità"]
-    risultato = priorita_decoder.inverse_transform(previsione)
-
-    print(f"\nPriorità prevista: {risultato[0]}")
+    print(f"\nPriorità prevista: {previsione[0]}")
 
 
 def menu():
+    """
+    Menu testuale per usare il sistema.
+    """
     while True:
         print("\n--- MENÙ PRINCIPALE ---")
         print("1) Addestra il modello")
