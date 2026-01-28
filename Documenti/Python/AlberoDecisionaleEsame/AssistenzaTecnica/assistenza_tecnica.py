@@ -21,9 +21,11 @@ def carica_e_prepara_dati(percorso_csv):
     X = df.drop("Priorità", axis=1)
 
 
+
     print("X prima del coding:", X)
     # One-Hot Encoding: ogni categoria diventa una colonna binaria (0/1)
     X = pd.get_dummies(X)
+
 
     print("X prima dopo il coding:", X)
     return X, y
