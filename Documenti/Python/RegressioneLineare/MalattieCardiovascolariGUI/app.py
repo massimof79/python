@@ -16,7 +16,7 @@ from sklearn.linear_model import LogisticRegression
 # ===================== INIZIALIZZAZIONE APP =====================
 
 app = Flask(__name__)   # Crea l'applicazione Flask
-CORS(app)               # Abilita CORS per tutte le rotte (da limitare in produzione)
+CORS(app)               # Abilita CORS per tutte le rotte (da modificare in produzione)
 
 # ============================================================
 # CARICAMENTO DATI E ADDESTRAMENTO MODELLO ALL'AVVIO
@@ -71,6 +71,8 @@ print("Modello addestrato e pronto all'uso.")
 # ============================================================
 # ENDPOINT API
 # ============================================================
+#Permette di far richiamare dal client una funzione.
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
