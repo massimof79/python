@@ -121,6 +121,17 @@ In questo progetto, l’oggetto salvato è l’intera pipeline di machine learni
 
 Salvare il modello in formato Pickle significa memorizzare su file lo stato interno del modello dopo l’addestramento. In questo modo:
 
+joblib è una libreria Python usata per memorizzare su disco oggetti anche complessi, come modelli di machine learning che contengono molti parametri numerici.
+
+dump è la funzione che effettua il salvataggio. In pratica “impacchetta” un oggetto Python e lo scrive in un file.
+
+pipeline è l’oggetto che vogliamo salvare. Non è solo il modello di regressione lineare, ma tutta la pipeline, cioè:
+
+lo StandardScaler con i parametri calcolati sui dati di training (media e deviazione standard),
+
+il modello LinearRegression con i coefficienti che ha imparato.
+
+
 \begin{itemize}
     \item non è necessario riaddestrare il modello ogni volta che si avvia il programma;
     \item il modello può essere caricato rapidamente e usato per fare nuove previsioni.

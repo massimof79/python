@@ -1,0 +1,224 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+
+\title{Applicazione di Machine Learning con Regressione Lineare\\
+Stima del Prezzo di una Casa}
+\author{Esercitazione di Informatica}
+\date{}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Obiettivo del progetto}
+
+In questa esercitazione realizziamo un'applicazione di intelligenza artificiale capace di stimare il \textbf{prezzo di una casa} a partire da alcune sue caratteristiche.
+
+L'applicazione:
+\begin{itemize}
+    \item utilizza un dataset reale di abitazioni;
+    \item addestra un modello di \textbf{regressione lineare};
+    \item salva il modello su file;
+    \item mette il modello a disposizione tramite una pagina web in cui l’utente inserisce i dati della casa.
+\end{itemize}
+
+A differenza degli esercizi di classificazione, qui il risultato non è una categoria, ma un \textbf{numero reale}: il prezzo stimato.
+
+\section{Che cos’è la regressione lineare}
+
+La regressione lineare è un metodo matematico che serve a descrivere la relazione tra più grandezze numeriche.
+
+Nel nostro caso:
+\begin{itemize}
+    \item le \textbf{variabili di ingresso} sono le caratteristiche della casa;
+    \item la \textbf{variabile di uscita} è il prezzo.
+\end{itemize}
+
+Il modello cerca di trovare una formula del tipo:
+
+\[
+prezzo = a_1 x_1 + a_2 x_2 + a_3 x_3 + \dots + b
+\]
+
+dove:
+\begin{itemize}
+    \item $x_1, x_2, x_3$ sono le caratteristiche della casa,
+    \item $a_1, a_2, a_3$ sono numeri che il modello impara dai dati,
+    \item $b$ è un valore costante.
+\end{itemize}
+
+\section{Il dataset}
+
+Il dataset contiene informazioni su diverse abitazioni. Ogni riga rappresenta una casa.
+
+Le variabili usate sono:
+
+\begin{itemize}
+    \item \textbf{RM} – Numero medio di stanze
+    \item \textbf{LSTAT} – Percentuale di popolazione a basso reddito nella zona
+    \item \textbf{PTRATIO} – Rapporto studenti/docenti nelle scuole locali
+    \item \textbf{TAX} – Tassa immobiliare locale
+    \item \textbf{AGE} – Percentuale di abitazioni costruite prima del 1940
+\end{itemize}
+
+La variabile da prevedere è:
+
+\begin{itemize}
+    \item \textbf{MEDV} – Valore medio delle abitazioni (in migliaia di dollari)
+\end{itemize}
+
+\section{Fase 1: Addestramento del modello}
+
+Il file \texttt{train\_model\_linear.py} si occupa di insegnare al modello come stimare il prezzo.
+
+\subsection{Caricamento dei dati}
+
+\begin{lstlisting}[language=Python]
+housing = fetch_openml(name="boston", version=1, as_frame=True)
+df = housing.frame
+\end{lstlisting}
+
+I dati vengono caricati e salvati in una tabella.
+
+\subsection{Scelta delle variabili}
+
+\begin{lstlisting}[language=Python]
+X = df[features]
+y = df["MEDV"]
+\end{lstlisting}
+
+\begin{itemize}
+    \item \texttt{X} contiene le caratteristiche delle case
+    \item \texttt{y} contiene i prezzi reali
+\end{itemize}
+
+\subsection{Divisione in training e test}
+
+Una parte dei dati serve per addestrare il modello, l’altra per verificarne la precisione.
+
+\subsection{Creazione del modello}
+
+\begin{lstlisting}[language=Python]
+pipeline = Pipeline([
+    ("scaler", StandardScaler()),
+    ("model", LinearRegression())
+])
+\end{lstlisting}
+
+La pipeline esegue due operazioni:
+\begin{enumerate}
+    \item Normalizza i dati (StandardScaler)
+    \item Applica la regressione lineare
+\end{enumerate}
+
+\subsection{Addestramento}
+
+\begin{lstlisting}[language=Python]
+pipeline.fit(X_train, y_train)
+\end{lstlisting}
+
+Il modello analizza gli esempi e impara i coefficienti della formula matematica che collega caratteristiche e prezzo.
+
+\subsection{Valutazione}
+
+Il modello viene testato confrontando i prezzi stimati con quelli reali.
+
+\section{Salvataggio del modello}
+
+\begin{lstlisting}[language=Python]
+joblib.dump(pipeline, "modello_case.pkl")
+\end{lstlisting}
+
+Il file \texttt{.pkl} contiene il modello già addestrato, pronto per essere riutilizzato.
+
+\section{Fase 2: Applicazione Web}
+
+Il file \texttt{app.py} crea un piccolo server web con Flask.
+
+Quando l’utente visita il sito, viene mostrata una pagina con un modulo dove inserire i dati della casa.
+
+\subsection{Predizione del prezzo}
+
+Quando l’utente invia il modulo:
+\begin{enumerate}
+    \item I dati vengono inviati al server
+    \item Il server li passa al modello caricato dal file \texttt{.pkl}
+    \item Il modello calcola il prezzo stimato
+    \item Il risultato viene rimandato al browser
+\end{enumerate}
+
+\section{Interfaccia utente}
+
+La pagina HTML contiene campi di input numerici.  
+Il file JavaScript raccoglie i valori e li invia al server usando una richiesta HTTP.
+
+Il risultato finale è una stima automatica del prezzo della casa.
+
+
+\section*{Che cos'è una Pipeline nel Machine Learning}
+
+Una \textbf{pipeline}, in ambito machine learning, è una sequenza ordinata di operazioni applicate ai dati, dove l'uscita di un passaggio diventa l'ingresso del successivo. Serve a rendere il processo di analisi ripetibile, ordinato e meno soggetto a errori.
+
+Si può immaginare come una linea di montaggio: il ``prodotto grezzo'' sono i dati, e in ogni stazione avviene una trasformazione precisa fino ad arrivare al modello che produce la previsione finale.
+
+\subsection*{Le fasi principali di una pipeline}
+
+In un problema di classificazione, una pipeline tipica comprende tre fasi fondamentali.
+
+\subsubsection*{1. Preparazione dei dati}
+In questa fase si sistemano i dati prima di usarli nel modello. Alcune operazioni comuni sono:
+\begin{itemize}
+	\item gestione dei valori mancanti;
+	\item trasformazione di dati categorici (parole) in numeri;
+	\item ridimensionamento delle variabili numeriche (scaling).
+\end{itemize}
+
+Questo passaggio è molto importante perché gli algoritmi di machine learning lavorano solo con numeri e possono essere influenzati da grandezze espresse su scale molto diverse.
+
+\subsubsection*{2. Trasformazione dei dati}
+Qui i dati vengono modificati per renderli più adatti all'apprendimento del modello. Per esempio:
+\begin{itemize}
+	\item normalizzazione dei valori;
+	\item standardizzazione;
+	\item creazione di nuove caratteristiche a partire da quelle esistenti.
+\end{itemize}
+
+Queste trasformazioni aiutano il modello a individuare meglio le relazioni presenti nei dati.
+
+\subsubsection*{3. Modello di apprendimento}
+Nell'ultima fase entra in gioco l'algoritmo di machine learning vero e proprio. Il modello impara dai dati di addestramento e poi è in grado di fare previsioni su dati nuovi e mai visti prima.
+
+\subsection*{Perché la pipeline è utile}
+
+Il vantaggio principale di una pipeline è che \textbf{automatizza tutto il processo}. Quando vengono forniti nuovi dati, la pipeline applica esattamente le stesse trasformazioni usate durante l'addestramento, prima di effettuare la previsione.
+
+Questo evita errori molto comuni, come:
+\begin{itemize}
+	\item dimenticare di applicare una trasformazione ai dati di test;
+	\item usare trasformazioni diverse tra dati di addestramento e dati di verifica.
+\end{itemize}
+
+\subsection*{Aspetto pratico}
+
+Nelle principali librerie di machine learning, una pipeline è un oggetto che contiene in ordine tutti i passaggi. Quando si esegue l'addestramento, ogni fase calcola i propri parametri usando solo i dati di training. Quando si fanno previsioni, quegli stessi parametri vengono riutilizzati automaticamente sui nuovi dati.
+
+\subsection*{In sintesi}
+
+Una pipeline è un modo strutturato e sicuro per passare dai dati grezzi alle previsioni di un modello. Riduce gli errori, rende il lavoro più ordinato e garantisce che il processo sia sempre ripetibile. In pratica, si definiscono le regole una sola volta e il sistema le applica correttamente ogni volta.
+
+
+\end{document}
