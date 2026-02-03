@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Stima prezzo abitazione</title>
+</head>
+<body>
+    <h2>Stima del prezzo di una casa</h2>
+
+    <form id="formCasa">
+        <label>Numero medio stanze (RM): <input type="number" step="0.1" id="rm"></label><br>
+        <label>% popolazione basso reddito (LSTAT): <input type="number" step="0.1" id="lstat"></label><br>
+        <label>Rapporto studenti/docenti (PTRATIO): <input type="number" step="0.1" id="ptratio"></label><br>
+        <label>Tassa immobiliare (TAX): <input type="number" step="1" id="tax"></label><br>
+        <label>Età media abitazioni (AGE): <input type="number" step="0.1" id="age"></label><br><br>
+
+        <button type="submit">Calcola prezzo stimato</button>
+    </form>
+
+    <h3 id="risultato"></h3>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

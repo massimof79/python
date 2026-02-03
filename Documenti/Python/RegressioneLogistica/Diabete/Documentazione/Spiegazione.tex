@@ -1,0 +1,149 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+
+\title{Applicazione di Machine Learning con Regressione Logistica\\
+Stima del Rischio di Diabete}
+\author{Prof. Fedeli Massimo}
+\date{}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Obiettivo del progetto}
+
+In questa esercitazione realizziamo una piccola applicazione di intelligenza artificiale che utilizza un modello di regressione logistica per stimare la probabilità che una persona sia affetta da diabete.
+
+L'applicazione:
+\begin{itemize}
+    \item usa un dataset medico reale;
+    \item addestra un modello di machine learning;
+    \item salva il modello su file;
+    \item mette il modello a disposizione tramite una pagina web in cui l’utente inserisce i propri dati.
+\end{itemize}
+
+\section{Il dataset}
+
+Il modello viene addestrato usando un dataset pubblico contenente informazioni cliniche di diverse pazienti.  
+Ogni riga del dataset rappresenta una persona, descritta da alcune misure mediche.
+
+Le principali variabili sono:
+
+\begin{itemize}
+    \item \textbf{Pregnancies} – Numero di gravidanze
+    \item \textbf{Glucose} – Livello di glucosio nel sangue
+    \item \textbf{BloodPressure} – Pressione sanguigna
+    \item \textbf{SkinThickness} – Spessore della plica cutanea
+    \item \textbf{Insulin} – Livello di insulina
+    \item \textbf{BMI} – Indice di massa corporea
+    \item \textbf{DiabetesPedigreeFunction} – Indicatore di familiarità
+    \item \textbf{Age} – Età
+    \item \textbf{Outcome} – 1 se la persona ha il diabete, 0 altrimenti
+\end{itemize}
+
+L’ultima colonna (Outcome) è quella che il modello deve imparare a prevedere.
+
+\section{Fase 1: Addestramento del modello}
+
+Il file \texttt{train\_model.py} serve a creare e addestrare il modello.
+
+\subsection{Caricamento dei dati}
+
+\begin{lstlisting}[language=Python]
+df = pd.read_csv("diabetes.csv")
+\end{lstlisting}
+
+Qui leggiamo il file CSV che contiene il dataset e lo memorizziamo in una struttura dati chiamata DataFrame.
+
+\subsection{Separazione tra input e output}
+
+\begin{lstlisting}[language=Python]
+X = df[features]
+y = df["Outcome"]
+\end{lstlisting}
+
+\begin{itemize}
+    \item \texttt{X} contiene le informazioni di ingresso (età, glucosio, ecc.)
+    \item \texttt{y} contiene la risposta corretta (diabete sì/no)
+\end{itemize}
+
+\subsection{Divisione in training e test}
+
+I dati vengono divisi in:
+\begin{itemize}
+    \item Training set (80\%) per insegnare al modello
+    \item Test set (20\%) per verificare se ha imparato correttamente
+\end{itemize}
+
+\subsection{Standardizzazione e modello}
+
+La pipeline contiene due passaggi:
+\begin{enumerate}
+    \item StandardScaler – normalizza i dati
+    \item LogisticRegression – modello matematico che stima una probabilità tra 0 e 1
+\end{enumerate}
+
+\subsection{Addestramento}
+
+Il modello osserva i dati di training e impara a collegare i valori clinici alla presenza o meno del diabete.
+
+\subsection{Salvataggio del modello}
+
+\begin{lstlisting}[language=Python]
+joblib.dump(pipeline, "modello_diabete.pkl")
+\end{lstlisting}
+
+Il modello viene salvato su file, così potrà essere riutilizzato nell'applicazione web senza doverlo riaddestrare ogni volta.
+
+\section{Che cos’è il file \texttt{.pkl}}
+
+Il file con estensione \texttt{.pkl} è un file in formato \textbf{Pickle}, un formato usato da Python per salvare oggetti su disco.
+
+In questo progetto, l’oggetto salvato è l’intera pipeline di machine learning, che include:
+\begin{itemize}
+    \item i parametri calcolati dallo StandardScaler
+    \item i pesi appresi dal modello di regressione logistica
+\end{itemize}
+
+Salvare il modello in formato Pickle significa memorizzare su file lo stato interno del modello dopo l’addestramento. In questo modo:
+
+\begin{itemize}
+    \item non è necessario riaddestrare il modello ogni volta che si avvia il programma;
+    \item il modello può essere caricato rapidamente e usato per fare nuove previsioni.
+\end{itemize}
+
+Il caricamento avviene con:
+
+\begin{lstlisting}[language=Python]
+model = joblib.load("modello_diabete.pkl")
+\end{lstlisting}
+
+A questo punto il modello è pronto per ricevere nuovi dati e calcolare la probabilità di diabete.
+
+\section{Fase 2: Applicazione Web con Flask}
+
+Il file \texttt{app.py} crea un piccolo server web che permette agli utenti di usare il modello tramite una pagina web.
+
+Quando l’utente inserisce i dati:
+\begin{enumerate}
+    \item i valori vengono inviati al server;
+    \item il server li passa al modello caricato dal file \texttt{.pkl};
+    \item il modello restituisce una probabilità;
+    \item il risultato viene mostrato nella pagina.
+\end{enumerate}
+
+\end{document}
