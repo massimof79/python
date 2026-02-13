@@ -1,3 +1,4 @@
-Una cooperativa locale desidera offrire piccoli prestiti a cittadini che intendono avviare micro-attività (artigianato, servizi digitali, ripetizioni, piccole riparazioni, ecc.). Le richieste sono numerose e il personale amministrativo fatica a valutarle in modo uniforme e rapido.
-
-L’obiettivo non è sostituire la decisione umana, ma fornire uno strumento di supporto che aiuti a classificare automaticamente le richieste in base al livello di affidabilità del richiedente, così da velocizzare la fase preliminare di valutazione.
+Una cooperativa locale desidera offrire piccoli prestiti a cittadini che intendono avviare micro-attività (artigianato, servizi digitali, ripetizioni, piccole riparazioni, ecc.). 
+Le richieste sono numerose e il personale amministrativo fatica a valutarle in modo uniforme e rapido.
+L’obiettivo non è sostituire la decisione umana, ma fornire uno strumento di supporto che aiuti a classificare automaticamente le richieste in base al 
+livello di affidabilità del richiedente, così da velocizzare la fase preliminare di valutazione.
