@@ -1,138 +1,84 @@
-# ==========================================
-# SOLUZIONE: Consumo energetico aule (RF)
-# File atteso: consumo_aule.csv
-# Target: consumo_energetico (basso/medio/alto)
-# ==========================================
-
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score
 
+# Colonne
+CAT = ["uso_luci", "uso_climatizzazione", "giorno_settimana", "attivita"]
+NUM = ["numero_studenti", "ore_utilizzo_aula", "numero_dispositivi_elettronici", "temperatura_esterna"]
+TARGET = "consumo_energetico"
 
-# 1) CARICAMENTO DATI
+# 1) Carico i dati
 df = pd.read_csv("consumo_aule.csv")
 
-print("Prime righe:")
-print(df.head())
-print("\nValori mancanti per colonna:")
-print(df.isnull().sum())
+# 2) Rimuovo righe senza target
+df = df.dropna(subset=[TARGET])
 
+# 3) Separo X e y
+X = df[CAT + NUM]
+y = df[TARGET]
 
-# 2) PULIZIA MINIMA (semplice e robusta)
-# - Rimuovo righe con target mancante (non ha senso tenerle)
-df = df.dropna(subset=["consumo_energetico"]).copy()
+print(X)
+""" Il parametro stratify serve a mantenere la stessa distribuzione delle classi tra training set e test set.
 
-# - Imputazione molto semplice per eventuali mancanti:
-#   numeriche -> mediana, categoriche -> moda
-categorical_cols = ["uso_luci", "uso_climatizzazione", "giorno_settimana", "attivita"]
-numeric_cols = [
-    "numero_studenti",
-    "ore_utilizzo_aula",
-    "numero_dispositivi_elettronici",
-    "temperatura_esterna",
-]
+Nel tuo caso la variabile target è consumo_energetico, che ha tre possibili valori: basso, medio, alto.
 
-# (se qualche colonna non esiste, errore esplicito)
-required_cols = set(categorical_cols + numeric_cols + ["consumo_energetico"])
-missing = required_cols.difference(df.columns)
-if missing:
-    raise ValueError(f"Mancano nel CSV queste colonne richieste: {sorted(missing)}")
+Quando dividi il dataset in:
 
-# Imputazione numeriche
-for c in numeric_cols:
-    if df[c].isnull().any():
-        df[c] = df[c].fillna(df[c].median())
+80% training
+20% test
 
-# Imputazione categoriche
-for c in categorical_cols:
-    if df[c].isnull().any():
-        mode_val = df[c].mode(dropna=True)
-        mode_val = mode_val.iloc[0] if len(mode_val) > 0 else "sconosciuto"
-        df[c] = df[c].fillna(mode_val)
+senza stratify la divisione è casuale. Questo può creare squilibri.
 
-print("\nDistribuzione target (consumo_energetico):")
-print(df["consumo_energetico"].value_counts(normalize=True))
+Esempio.
 
+Immagina che nel dataset completo tu abbia:
 
-# 3) FEATURES / TARGET
-X = df[categorical_cols + numeric_cols]
-y = df["consumo_energetico"]
+50% medio
+30% basso
+20% alto
 
+Se non usi stratify, può succedere che nel test set capiti, per puro caso:
 
-# 4) TRAIN / TEST SPLIT
+70% medio
+25% basso
+5% alto """
+
+# 4) Train / Test split
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y  # utile se le classi sono sbilanciate
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-
-# 5) PREPROCESSING: OneHot sulle categoriche, passthrough sulle numeriche
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
-        ("num", "passthrough", numeric_cols),
-    ]
-)
-
-# 6) MODELLO: Random Forest
-rf = RandomForestClassifier(
-    n_estimators=200,
-    max_depth=8,
-    random_state=42
-)
-
-# Pipeline completa: preprocessing + modello
-model = Pipeline(steps=[
-    ("preprocess", preprocessor),
-    ("rf", rf)
+# 5) Preprocessing (trasformazione dati)
+preprocess = ColumnTransformer([
+    ("cat", OneHotEncoder(handle_unknown="ignore"), CAT),
+    ("num", "passthrough", NUM),
 ])
 
 
-# 7) TRAINING
-model.fit(X_train, y_train)
 
+# Applico la trasformazione ai dati di training
+X_train_prep = preprocess.fit_transform(X_train)
 
-# 8) VALUTAZIONE
-y_pred = model.predict(X_test)
+print(CAT + NUM)
+print(X_train_prep)
+# Applico la stessa trasformazione ai dati di test
+X_test_prep = preprocess.transform(X_test)
 
-acc = accuracy_score(y_test, y_pred)
-print("\nAccuracy:", acc)
+# 6) Modello
+model = RandomForestClassifier(n_estimators=200, max_depth=8, random_state=42)
 
-print("\nMatrice di confusione:")
-print(confusion_matrix(y_test, y_pred))
+# Addestramento
+model.fit(X_train_prep, y_train)
 
-print("\nClassification report:")
-print(classification_report(y_test, y_pred))
+# 7) Valutazione
+pred = model.predict(X_test_prep)
+print("Accuracy:", round(accuracy_score(y_test, pred), 2))
 
-
-# 9) FEATURE IMPORTANCE (con nomi delle feature dopo OneHot)
-# Recupero i nomi delle feature
-ohe = model.named_steps["preprocess"].named_transformers_["cat"]
-cat_feature_names = ohe.get_feature_names_out(categorical_cols)
-
-all_feature_names = list(cat_feature_names) + numeric_cols
-
-importances = model.named_steps["rf"].feature_importances_
-
-importance_df = (
-    pd.DataFrame({"feature": all_feature_names, "importance": importances})
-    .sort_values("importance", ascending=False)
-    .reset_index(drop=True)
-)
-
-print("\nTop 15 feature per importanza:")
-print(importance_df.head(15))
-
-
-# 10) PREDIZIONE SU UN CASO NUOVO (ESEMPIO)
-nuovo_caso = pd.DataFrame([{
+# 8) Nuovo caso
+nuovo = pd.DataFrame([{
     "uso_luci": "si",
     "uso_climatizzazione": "no",
     "giorno_settimana": "feriale",
@@ -143,9 +89,7 @@ nuovo_caso = pd.DataFrame([{
     "temperatura_esterna": 12.0
 }])
 
-pred_nuovo = model.predict(nuovo_caso)[0]
-proba_nuovo = model.predict_proba(nuovo_caso)[0]
-classi = model.named_steps["rf"].classes_
+# Trasformo anche il nuovo caso
+nuovo_prep = preprocess.transform(nuovo)
 
-print("\nEsempio previsione nuovo caso:", pred_nuovo)
-print("Probabilità per classe:", dict(zip(classi, proba_nuovo)))
+print("Previsione nuovo caso:", model.predict(nuovo_prep)[0])
