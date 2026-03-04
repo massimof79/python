@@ -14,8 +14,18 @@ distanza = np.random.uniform(0.2, 4.0, n) # km metro
 eta = np.random.uniform(0, 50, n)         # anni
 
 # Prezzo (k€): cresce con mq, cala con distanza ed età + rumore
+
+""" genera numeri casuali secondo una distribuzione normale (gaussiana) e li memorizza nella variabile rumore.
+La funzione generale è:   np.random.normal(media, deviazione_standard, size) dove:
+media (μ) è il valore attorno a cui si concentrano i dati
+deviazione standard (σ) misura quanto i valori tendono a disperdersi rispetto alla media
+size indica quanti valori generare
+"""
+
 rumore = np.random.normal(0, 20, n)
 prezzo = 2.5 * mq - 40 * distanza - 0.9 * eta + 90 + rumore
+
+#serve a costruire una matrice (array bidimensionale) affiancando più vettori come colonne.
 
 X = np.column_stack([mq, distanza, eta])
 y = prezzo
@@ -56,8 +66,23 @@ for (m, d, e), p in zip(nuovi, pred):
 # -------------------------
 eta_fissa = 20
 
+""" Questa istruzione crea una nuova figura grafica.
+La figura è il contenitore principale in cui verranno inseriti uno o più grafici.
+ """
 fig = plt.figure()
+
 ax = fig.add_subplot(111, projection='3d')
+
+
+""" Il parametro 111 è una notazione compatta che indica la struttura della griglia dei grafici.
+La notazione è composta da tre cifre:
+nrighe ncolonne indice
+
+Quindi: 111 significa:
+
+1 riga
+1 colonna
+grafico numero 1 """
 
 # punti reali (mostriamo quelli con età vicina alla sezione)
 mask = np.abs(eta - eta_fissa) < 5
