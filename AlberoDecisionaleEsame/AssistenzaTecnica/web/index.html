@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Assistenza Tecnica - Previsione Priorità</title>
+</head>
+<body>
+
+<h2>Previsione priorità richiesta di assistenza</h2>
+
+<form method="post">
+    <label>Tipo di problema:</label><br>
+    <select name="tipo_problema">
+        <option value="software">Software</option>
+        <option value="hardware">Hardware</option>
+        <option value="rete">Rete</option>
+    </select><br><br>
+
+    <label>Numero utenti coinvolti:</label><br>
+    <select name="utenti">
+        <option value="1">1</option>
+        <option value="2-5">2-5</option>
+        <option value=">5">&gt;5</option>
+    </select><br><br>
+
+    <label>Impatto sul servizio:</label><br>
+    <select name="impatto">
+        <option value="basso">Basso</option>
+        <option value="medio">Medio</option>
+        <option value="alto">Alto</option>
+    </select><br><br>
+
+    <label>Urgenza dichiarata:</label><br>
+    <select name="urgenza">
+        <option value="bassa">Bassa</option>
+        <option value="media">Media</option>
+        <option value="alta">Alta</option>
+    </select><br><br>
+
+    <button type="submit">Calcola priorità</button>
+</form>
+
+{% if risultato %}
+    <h3>Priorità prevista: {{ risultato }}</h3>
+{% endif %}
+
+</body>
+</html>

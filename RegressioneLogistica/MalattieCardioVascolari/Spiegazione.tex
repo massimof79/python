@@ -1,0 +1,148 @@
+\documentclass{beamer}
+
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\title[Sistema di Predizione del Rischio Cardiovascolare]
+{Sistema di Predizione del Rischio Cardiovascolare}
+\subtitle{Algoritmo di Regressione Logistica}
+\author{Prof. Fedeli Massimo}
+\institute{IIS Fermi Sacconi Cpia di Ascoli Piceno}
+\date{Tutti i diritti riservati}
+
+\begin{document}
+	
+	% Slide titolo
+	\begin{frame}
+		\titlepage
+	\end{frame}
+	
+	% Slide 1
+	\begin{frame}{Obiettivo del sistema}
+		Il sistema realizza una predizione del rischio cardiovascolare basata su tecniche di Machine Learning supervisionato.
+		
+		\medskip
+		L’obiettivo principale è \textbf{classificare} ciascun paziente in una delle due categorie:
+		\begin{itemize}
+			\item paziente sano
+			\item paziente a rischio di malattia cardiaca
+		\end{itemize}
+		
+		\medskip
+		La classificazione viene effettuata tramite un modello di regressione logistica addestrato su dati clinici reali.
+	\end{frame}
+	
+	% Slide 2
+	\begin{frame}{Dataset e caratteristiche}
+		Il punto di partenza è il caricamento di un \textbf{dataset} contenente informazioni cliniche e anagrafiche dei pazienti.
+		
+		\medskip
+		Tra le principali variabili considerate:
+		\begin{itemize}
+			\item età
+			\item sesso
+			\item pressione sanguigna
+			\item colesterolo
+			\item risultati di test diagnostici
+		\end{itemize}
+		
+		\medskip
+		I dati vengono letti direttamente da una sorgente online e organizzati in un DataFrame.
+	\end{frame}
+	
+	% Slide 3
+	\begin{frame}{Pulizia e trasformazione dei dati}
+		Nel dataset originale sono presenti valori mancanti, indicati tramite un simbolo speciale.
+		
+		\medskip
+		La fase di \textbf{preprocessing} prevede:
+		\begin{itemize}
+			\item conversione dei valori mancanti in valori nulli
+			\item eliminazione delle osservazioni incomplete
+		\end{itemize}
+		
+		\medskip
+		Questa scelta, pur semplice, risulta adeguata per una versione didattica dell’algoritmo.
+	\end{frame}
+	
+	% Slide 4
+	\begin{frame}{Definizione del target}
+		Nel dataset originale il grado di malattia è espresso mediante più valori interi (0,1,2,3,4).
+		
+		\medskip
+		Il problema viene semplificato trasformando il target in forma binaria:
+		\begin{itemize}
+			\item assenza di malattia (0)
+			\item presenza di malattia (1)
+		\end{itemize}
+		
+		\medskip
+		Questa trasformazione rende il problema più adatto alla regressione logistica e più semplice da interpretare.
+	\end{frame}
+	
+	% Slide 5
+	\begin{frame}{Suddivisione del dataset}
+		La preparazione dei dati prevede la separazione tra:
+		\begin{itemize}
+			\item variabili di input (feature cliniche)
+			\item variabile di output (stato di salute)
+		\end{itemize}
+		
+		\medskip
+		Il dataset viene suddiviso in:
+		\begin{itemize}
+			\item insieme di addestramento
+			\item insieme di test
+		\end{itemize}
+		
+		\medskip
+		La suddivisione è stratificata, per mantenere proporzioni simili di pazienti sani e malati.
+	\end{frame}
+	
+	% Slide 6
+	\begin{frame}{Standardizzazione delle feature}
+		Le variabili cliniche presentano scale molto diverse tra loro.
+		
+		\medskip
+		Prima dell’addestramento viene applicata la standardizzazione:
+		\begin{itemize}
+			\item media nulla
+			\item deviazione standard unitaria
+		\end{itemize}
+		
+		\medskip
+		Questo passaggio è fondamentale per la \textbf{regressione logistica}, che è sensibile alle differenze di scala tra le variabili.
+	\end{frame}
+	
+	% Slide 7
+	\begin{frame}{Addestramento del modello}
+		Il modello utilizzato è una regressione logistica per problemi di classificazione binaria.
+		
+		\medskip
+		Durante l’addestramento il modello:
+		\begin{itemize}
+			\item apprende un insieme di pesi
+			\item quantifica l’influenza di ciascuna variabile clinica
+		\end{itemize}
+		
+		\medskip
+		L’output del modello è la probabilità che un paziente appartenga alla classe “a rischio”.
+	\end{frame}
+	
+	% Slide 8
+	\begin{frame}{Valutazione delle prestazioni}
+		Il modello viene valutato sui \textbf{dati di test}, non utilizzati durante l’addestramento.
+		
+		\medskip
+		Le previsioni vengono confrontate con i valori reali per calcolare l’accuratezza.
+		
+		\medskip
+		L’accuratezza rappresenta la percentuale di classificazioni corrette e fornisce una prima indicazione dell’efficacia del sistema, pur non esaurendo tutte le possibili metriche clinicamente rilevanti.
+	\end{frame}
+	
+\end{document}

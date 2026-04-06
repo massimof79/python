@@ -1,0 +1,139 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{margin=2.5cm}
+
+\title{Descrizione di un Sistema di Classificazione della Priorità delle Richieste di Assistenza}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Obiettivo del sistema}
+
+Il codice implementa un semplice sistema di \textbf{Machine Learning} per stimare automaticamente la \textbf{priorità di una richiesta di assistenza tecnica}.  
+L'idea di base è utilizzare dati storici relativi a richieste precedenti per addestrare un modello in grado di prevedere la priorità di nuove segnalazioni.
+
+Il sistema è pensato per simulare uno scenario realistico di \emph{service desk IT}, in cui le richieste possono riguardare problemi software, hardware o di rete, con diverso impatto sugli utenti e sui servizi.
+
+\section{Struttura generale del programma}
+
+Il programma è organizzato in quattro parti principali:
+
+\begin{itemize}
+    \item Preparazione dei dati
+    \item Addestramento del modello
+    \item Previsione su nuovi dati inseriti da tastiera
+    \item Menu interattivo per l’utente
+\end{itemize}
+
+Sono inoltre presenti due variabili globali:
+
+\begin{itemize}
+    \item \texttt{modello}: conterrà il classificatore addestrato
+    \item \texttt{colonne\_modello}: memorizza la struttura delle colonne generate durante la codifica dei dati, necessaria per effettuare previsioni coerenti
+\end{itemize}
+
+\section{Preparazione dei dati}
+
+La funzione \texttt{carica\_e\_prepara\_dati(percorso\_csv)} si occupa di:
+
+\begin{enumerate}
+    \item Caricare un file CSV contenente richieste di assistenza passate.
+    \item Separare la variabile target \texttt{Priorità} (cioè ciò che vogliamo prevedere) dalle altre colonne descrittive.
+    \item Trasformare le variabili categoriali in variabili numeriche tramite \textbf{One-Hot Encoding}.
+\end{enumerate}
+
+Il One-Hot Encoding converte ogni categoria testuale in una colonna binaria (0/1).  
+Ad esempio, la variabile \emph{Tipo\_problema} può generare colonne come:
+
+\begin{itemize}
+    \item Tipo\_problema\_software
+    \item Tipo\_problema\_hardware
+    \item Tipo\_problema\_rete
+\end{itemize}
+
+Questo passaggio è necessario perché gli algoritmi di Machine Learning lavorano su dati numerici.
+
+\section{Addestramento del modello}
+
+La funzione \texttt{addestra\_modello()} realizza la fase di apprendimento.
+
+\subsection{Suddivisione dei dati}
+
+Il dataset viene suddiviso in:
+
+\begin{itemize}
+    \item \textbf{Training set} (70\%): usato per addestrare il modello
+    \item \textbf{Test set} (30\%): usato per valutarne le prestazioni
+\end{itemize}
+
+\subsection{Algoritmo utilizzato}
+
+Il modello scelto è un \textbf{Decision Tree Classifier} (albero decisionale), configurato con:
+
+\begin{itemize}
+    \item criterio \texttt{gini}, per misurare la qualità delle divisioni
+    \item profondità massima pari a 4, per evitare un eccessivo adattamento ai dati (overfitting)
+\end{itemize}
+
+L’albero decisionale apprende regole del tipo:
+
+\begin{quote}
+Se l’impatto è alto e l’urgenza è alta allora la priorità è elevata.
+\end{quote}
+
+\subsection{Valutazione}
+
+Dopo l’addestramento, il modello effettua previsioni sul test set.  
+Le prestazioni vengono misurate tramite l’\textbf{accuratezza}, cioè la percentuale di previsioni corrette.
+
+\section{Previsione su nuove richieste}
+
+La funzione \texttt{effettua\_previsione()} permette all’utente di inserire manualmente i dati di una nuova richiesta:
+
+\begin{itemize}
+    \item Tipo di problema
+    \item Numero di utenti coinvolti
+    \item Impatto sul servizio
+    \item Urgenza dichiarata
+\end{itemize}
+
+Anche questi dati vengono codificati con One-Hot Encoding.  
+Poiché le colonne generate devono essere identiche a quelle usate in addestramento, il codice riallinea la struttura usando \texttt{colonne\_modello}. Eventuali colonne mancanti vengono riempite con 0.
+
+Il modello produce quindi la \textbf{priorità prevista} per la richiesta.
+
+\section{Interfaccia utente}
+
+La funzione \texttt{menu()} implementa un semplice menu testuale che consente di:
+
+\begin{itemize}
+    \item Addestrare il modello
+    \item Effettuare una previsione
+    \item Uscire dal programma
+\end{itemize}
+
+Il sistema è quindi pensato come un piccolo applicativo didattico interattivo, utile per comprendere l’intero flusso di un progetto di Machine Learning:
+
+\begin{center}
+Dati $\rightarrow$ Preparazione $\rightarrow$ Addestramento $\rightarrow$ Valutazione $\rightarrow$ Previsione
+\end{center}
+
+\section{Conclusione}
+
+Il codice dimostra in modo completo e compatto come costruire un sistema di classificazione supervisionata applicato a un contesto realistico.  
+Oltre agli aspetti algoritmici, evidenzia due concetti fondamentali:
+
+\begin{itemize}
+    \item la necessità di trasformare correttamente i dati categoriali
+    \item l'importanza di mantenere coerenza tra fase di addestramento e fase di previsione
+\end{itemize}
+
+Si tratta di un esempio didattico efficace per introdurre alberi decisionali, preprocessing dei dati e valutazione delle prestazioni di un modello predittivo.
+
+\end{document}

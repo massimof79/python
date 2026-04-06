@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Stima rischio diabete</title>
+</head>
+<body>
+    <h2>Valutazione preliminare rischio diabete</h2>
+
+    <form id="formDiabete">
+        <label>Gravidanze: <input type="number" id="pregnancies"></label><br>
+        <label>Glucosio: <input type="number" id="glucose"></label><br>
+        <label>Pressione diastolica: <input type="number" id="bloodpressure"></label><br>
+        <label>Plica cutanea: <input type="number" id="skinthickness"></label><br>
+        <label>Insulina: <input type="number" id="insulin"></label><br>
+        <label>BMI: <input type="number" step="0.1" id="bmi"></label><br>
+        <label>Familiarità (DPF): <input type="number" step="0.01" id="dpf"></label><br>
+        <label>Età: <input type="number" id="age"></label><br><br>
+
+        <button type="submit">Calcola rischio</button>
+    </form>
+
+    <h3 id="risultato"></h3>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+\frametitle{Installazione Dipendenze}
+\begin{lstlisting}
+			pip install flask flask-cors pandas scikit-learn
+		\end{lstlisting}
+		
+		\vspace{0.3cm}
+		\textbf{Pacchetti:}
+		\begin{itemize}
+			\item Flask: server web
+			\item Flask-CORS: gestione CORS
+			\item Pandas: analisi dati
+			\item Scikit-learn: machine learning
+		\end{itemize}

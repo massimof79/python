@@ -1,0 +1,198 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\definecolor{codegray}{gray}{0.95}
+\definecolor{myblue}{RGB}{0, 102, 204}
+
+\lstset{
+	backgroundcolor=\color{codegray},
+	basicstyle=\ttfamily\footnotesize,
+	frame=single,
+	keywordstyle=\color{blue}\bfseries,
+	commentstyle=\color{gray},
+	stringstyle=\color{orange},
+	breaklines=true,
+	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+	language=Python,
+	morekeywords={app, route, request, jsonify, render_template}
+}
+
+\title{Flask: Esecuzione di Python lato Server}
+\author{Prof. Fedeli Massimo}
+\date{\today}
+
+\begin{document}
+	
+	\maketitle
+	
+	\tableofcontents
+	\newpage
+	
+	\section{Introduzione}
+	\textbf{Flask} è un \textit{micro-framework} web per Python, leggero, flessibile e ideale per creare applicazioni web o API RESTful.  
+	Permette di eseguire codice Python lato server, rispondendo a richieste HTTP da parte di client (browser, app, altri servizi).
+	
+	\section{Caratteristiche Principali}
+	\begin{itemize}
+		\item \textbf{Leggero}: solo il necessario, niente overhead.
+		\item \textbf{Modulare}: si espande con estensioni (es. Flask-CORS, Flask-SQLAlchemy).
+		\item \textbf{Python puro}: niente sintassi aggiuntiva o generatori di codice.
+		\item \textbf{Werkzeug-based}: usa un server WSGI di sviluppo robusto.
+	\end{itemize}
+	
+	\section{Installazione}
+	\begin{lstlisting}
+		pip install flask
+	\end{lstlisting}
+	
+	\section{Struttura Minima di un'App Flask}
+	\begin{lstlisting}
+		from flask import Flask
+		
+		app = Flask(__name__)
+		
+		@app.route('/')
+		def home():
+		return "Ciao da Flask!"
+		
+		if __name__ == '__main__':
+		app.run(debug=True)
+	\end{lstlisting}
+	
+	\section{Routing e Decoratori}
+	\subsection{Route Statiche}
+	\begin{lstlisting}
+		@app.route('/about')
+		def about():
+		return "Pagina About"
+	\end{lstlisting}
+	
+	\subsection{Route con Parametri}
+	\begin{lstlisting}
+		@app.route('/user/<nome>')
+		def user(nome):
+		return f"Ciao, {nome}!"
+	\end{lstlisting}
+	
+	\subsection{Metodi HTTP}
+	\begin{lstlisting}
+		@app.route('/api/data', methods=['GET', 'POST'])
+		def data():
+		if request.method == 'POST':
+		return jsonify({"ricevuto": request.json})
+		return jsonify({"messaggio": "Dati disponibili"})
+	\end{lstlisting}
+	
+	\section{Gestione delle Richieste}
+	\subsection{JSON (API)}
+	\begin{lstlisting}
+		from flask import request, jsonify
+		
+		@app.route('/predict', methods=['POST'])
+		def predict():
+		data = request.json
+		risultato = {"predizione": data["valore"] * 2}
+		return jsonify(risultato)
+	\end{lstlisting}
+	
+	\subsection{Form HTML}
+	\begin{lstlisting}
+		@app.route('/form', methods=['GET', 'POST'])
+		def form():
+		if request.method == 'POST':
+		nome = request.form['nome']
+		return f"Ciao, {nome}!"
+		return '''
+		<form method="post">
+		Nome: <input name="nome">
+		<input type="submit">
+		</form>
+		'''
+	\end{lstlisting}
+	
+	\section{Template HTML (Jinja2)}
+	\begin{lstlisting}
+		from flask import render_template
+		
+		@app.route('/hello/<nome>')
+		def hello(nome):
+		return render_template('hello.html', nome=nome)
+	\end{lstlisting}
+	
+	\textbf{File: \texttt{templates/hello.html}}
+	\begin{lstlisting}
+		<!doctype html>
+		<html>
+		<body>
+		<h1>Ciao, {{ nome }}!</h1>
+		</body>
+		</html>
+	\end{lstlisting}
+	
+	\section{CORS: Accesso da Frontend}
+	\begin{lstlisting}
+		pip install flask-cors
+	\end{lstlisting}
+	\begin{lstlisting}
+		from flask_cors import CORS
+		
+		app = Flask(__name__)
+		CORS(app)  # Abilita CORS su tutte le route
+	\end{lstlisting}
+	
+	\section{Esempio Completo: API RESTful}
+	\begin{lstlisting}
+		from flask import Flask, request, jsonify
+		from flask_cors import CORS
+		
+		app = Flask(__name__)
+		CORS(app)
+		
+		@app.route('/api/somma', methods=['POST'])
+		def somma():
+		data = request.json
+		a = data.get('a', 0)
+		b = data.get('b', 0)
+		return jsonify({"risultato": a + b})
+		
+		if __name__ == '__main__':
+		app.run(debug=True)
+	\end{lstlisting}
+	
+	\textbf{Richiesta curl:}
+	\begin{lstlisting}
+		curl -X POST http://localhost:5000/api/somma \
+		-H "Content-Type: application/json" \
+		-d '{"a": 3, "b": 4}'
+	\end{lstlisting}
+	
+	\section{Deploy di Base}
+	\subsection{Ambiente di Produzione}
+	\begin{itemize}
+		\item \textbf{Non usare} il server di sviluppo in produzione.
+		\item Usa \textbf{Gunicorn} o \textbf{uWSGI} dietro \textbf{Nginx}.
+	\end{itemize}
+	
+	\begin{lstlisting}
+		pip install gunicorn
+		gunicorn app:app -b 0.0.0.0:8000
+	\end{lstlisting}
+	
+	\section{Conclusione}
+	Flask è lo strumento ideale per:
+	\begin{itemize}
+		\item Creare API RESTful in Python
+		\item Integrare modelli di machine learning in applicazioni web
+		\item Prototipare rapidamente servizi backend
+		\item Apprendere i concetti fondamentali del web development
+	\end{itemize}
+	
+\end{document}

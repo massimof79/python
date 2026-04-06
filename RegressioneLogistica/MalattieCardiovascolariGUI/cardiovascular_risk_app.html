@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predizione Rischio Cardiovascolare</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0 15px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; display: none; }
+        .risk-high { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+        .risk-low { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; display: none; border-radius: 5px; }
+        h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>🫀 Predizione Rischio Cardiovascolare</h1>
+    <p>Sistema basato su Regressione Logistica</p>
+    
+    <div class="error" id="errorMessage"></div>
+
+    <form id="form">
+        <label>Età (anni):</label>
+        <input type="number" id="age" required min="1" max="120" value="60">
+
+        <label>Sesso:</label>
+        <select id="sex" required>
+            <option value="1" selected>Maschile</option>
+            <option value="0">Femminile</option>
+        </select>
+
+        <label>Tipo Dolore Toracico:</label>
+        <select id="cp" required>
+            <option value="0" selected>Angina Tipica</option>
+            <option value="1">Angina Atipica</option>
+            <option value="2">Dolore Non-Anginoso</option>
+            <option value="3">Asintomatico</option>
+        </select>
+
+        <label>Pressione Sanguigna a Riposo (mm Hg):</label>
+        <input type="number" id="trestbps" required value="150">
+
+        <label>Colesterolo (mg/dl):</label>
+        <input type="number" id="chol" required value="250">
+
+        <label>Glicemia a Digiuno > 120 mg/dl:</label>
+        <select id="fbs" required>
+            <option value="1" selected>Sì</option>
+            <option value="0">No</option>
+        </select>
+
+        <label>Risultati ECG a Riposo:</label>
+        <select id="restecg" required>
+            <option value="0">Normale</option>
+            <option value="1" selected>Anomalia ST-T</option>
+            <option value="2">Ipertrofia Ventricolare</option>
+        </select>
+
+        <label>Frequenza Cardiaca Massima:</label>
+        <input type="number" id="thalach" required value="130">
+
+        <label>Angina Indotta da Esercizio:</label>
+        <select id="exang" required>
+            <option value="1" selected>Sì</option>
+            <option value="0">No</option>
+        </select>
+
+        <label>Depressione ST (Oldpeak):</label>
+        <input type="number" step="0.1" id="oldpeak" required value="2.3">
+
+        <label>Pendenza Segmento ST:</label>
+        <select id="slope" required>
+            <option value="0">Ascendente</option>
+            <option value="1" selected>Piatta</option>
+            <option value="2">Discendente</option>
+        </select>
+
+        <label>Numero Vasi Principali (0-3):</label>
+        <input type="number" id="ca" min="0" max="3" required value="1">
+
+        <label>Talassemia:</label>
+        <select id="thal" required>
+            <option value="0">Normale</option>
+            <option value="1">Difetto Fisso</option>
+            <option value="2">Difetto Reversibile</option>
+            <option value="3" selected>Altro</option>
+        </select>
+
+        <button type="submit">Calcola Rischio</button>
+    </form>
+
+    <div class="result" id="result"></div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/predict';
+
+        document.getElementById('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                age: parseFloat(document.getElementById('age').value),
+                sex: parseFloat(document.getElementById('sex').value),
+                cp: parseFloat(document.getElementById('cp').value),
+                trestbps: parseFloat(document.getElementById('trestbps').value),
+                chol: parseFloat(document.getElementById('chol').value),
+                fbs: parseFloat(document.getElementById('fbs').value),
+                restecg: parseFloat(document.getElementById('restecg').value),
+                thalach: parseFloat(document.getElementById('thalach').value),
+                exang: parseFloat(document.getElementById('exang').value),
+                oldpeak: parseFloat(document.getElementById('oldpeak').value),
+                slope: parseFloat(document.getElementById('slope').value),
+                ca: parseFloat(document.getElementById('ca').value),
+                thal: parseFloat(document.getElementById('thal').value)
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error('Errore nella richiesta al server');
+
+                const result = await response.json();
+                
+                const resultDiv = document.getElementById('result');
+                const errorDiv = document.getElementById('errorMessage');
+                
+                errorDiv.style.display = 'none';
+                resultDiv.style.display = 'block';
+                
+                if (result.prediction === 1) {
+                    resultDiv.className = 'result risk-high';
+                    resultDiv.innerHTML = `
+                        <h3>⚠️ PAZIENTE A RISCHIO</h3>
+                        <p><strong>Probabilità di malattia cardiovascolare: ${(result.probability * 100).toFixed(1)}%</strong></p>
+                        <p>Si raccomanda approfondimento diagnostico.</p>
+                    `;
+                } else {
+                    resultDiv.className = 'result risk-low';
+                    resultDiv.innerHTML = `
+                        <h3>✓ PAZIENTE SANO</h3>
+                        <p><strong>Probabilità di malattia cardiovascolare: ${(result.probability * 100).toFixed(1)}%</strong></p>
+                        <p>Il paziente presenta basso rischio cardiovascolare.</p>
+                    `;
+                }
+                
+            } catch (error) {
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.textContent = '❌ Errore: ' + error.message + '. Assicurati che il server Python sia in esecuzione su http://localhost:5000';
+                errorDiv.style.display = 'block';
+                document.getElementById('result').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

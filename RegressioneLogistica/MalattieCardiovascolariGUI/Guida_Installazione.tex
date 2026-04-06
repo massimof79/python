@@ -1,0 +1,424 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+
+\geometry{margin=2.5cm}
+
+\definecolor{codegray}{gray}{0.95}
+\definecolor{codeblue}{RGB}{52, 152, 219}
+\definecolor{codecomment}{RGB}{127, 127, 127}
+\definecolor{codestring}{RGB}{255, 140, 0}
+\definecolor{warningbg}{RGB}{255, 243, 205}
+\definecolor{warningborder}{RGB}{255, 193, 7}
+\definecolor{infobg}{RGB}{209, 236, 241}
+\definecolor{infoborder}{RGB}{23, 162, 184}
+\definecolor{successbg}{RGB}{212, 237, 218}
+\definecolor{successborder}{RGB}{40, 167, 69}
+
+\lstset{
+	backgroundcolor=\color{codegray},
+	basicstyle=\ttfamily\small,
+	frame=single,
+	keywordstyle=\color{codeblue}\bfseries,
+	commentstyle=\color{codecomment}\itshape,
+	stringstyle=\color{codestring},
+	breaklines=true,
+	showstringspaces=false,
+	numbers=none,
+}
+
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{warningbox}{
+	colback=warningbg,
+	colframe=warningborder,
+	leftrule=4pt,
+	arc=0pt,
+	outer arc=0pt,
+	boxrule=0pt,
+	breakable
+}
+
+\newtcolorbox{infobox}{
+	colback=infobg,
+	colframe=infoborder,
+	leftrule=4pt,
+	arc=0pt,
+	outer arc=0pt,
+	boxrule=0pt,
+	breakable
+}
+
+\newtcolorbox{successbox}{
+	colback=successbg,
+	colframe=successborder,
+	leftrule=4pt,
+	arc=0pt,
+	outer arc=0pt,
+	boxrule=0pt,
+	breakable
+}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=codeblue,
+	pdfborder={0 0 0}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Sistema di Predizione del Rischio Cardiovascolare}
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{Guida all'Installazione e all'Avvio - Versione 1.0}
+
+\title{\textbf{Sistema di Predizione del Rischio Cardiovascolare}\\
+	\large Guida Completa all'Installazione e all'Avvio}
+\author{Prof. Fedeli Massimo}
+\date{Versione 1.0 - \today}
+
+\begin{document}
+	
+	\maketitle
+	\thispagestyle{empty}
+	
+	\begin{center}
+		\textit{Basato su Regressione Logistica}
+	\end{center}
+	
+	\vspace{1cm}
+	
+	\tableofcontents
+	\newpage
+	
+	\section{Requisiti di Sistema}
+	
+	\subsection{Software Necessario}
+	
+	\begin{itemize}[leftmargin=*]
+		\item \textbf{Python 3.7 o superiore} - Linguaggio di programmazione per il backend
+		\item \textbf{pip} - Gestore pacchetti Python (solitamente incluso con Python)
+		\item \textbf{Browser Web moderno} - Chrome, Firefox, Safari o Edge
+		\item \textbf{Editor di testo} - VS Code, Sublime Text, o qualsiasi editor
+	\end{itemize}
+	
+	\subsection{Verifica Installazione Python}
+	
+	Per verificare se Python è installato correttamente, esegui nel terminale:
+	
+	\begin{lstlisting}[language=bash]
+		python --version
+		# oppure
+		python3 --version
+	\end{lstlisting}
+	
+	\begin{infobox}
+		\textbf{Nota:} Se Python non è installato, scaricalo da \url{https://www.python.org/downloads/}
+	\end{infobox}
+	
+	\section{Installazione delle Dipendenze}
+	
+	Apri il terminale o prompt dei comandi e installa i pacchetti necessari:
+	
+	\begin{lstlisting}[language=bash]
+		pip install flask flask-cors pandas scikit-learn
+	\end{lstlisting}
+	
+	\begin{successbox}
+		\textbf{Pacchetti installati:}
+		\begin{itemize}
+			\item \textbf{flask} - Framework web per il server API
+			\item \textbf{flask-cors} - Gestione Cross-Origin Resource Sharing
+			\item \textbf{pandas} - Manipolazione e analisi dati
+			\item \textbf{scikit-learn} - Libreria di Machine Learning
+		\end{itemize}
+	\end{successbox}
+	
+	\section{Struttura del Progetto}
+	
+	Crea una cartella per il progetto e organizza i file come segue:
+	
+	\begin{lstlisting}
+		cardiovascular-prediction/
+		|
+		|-- app.py              # Server Flask (Backend)
+		|-- index.html          # Interfaccia web (Frontend)
+		|-- README.md           # Documentazione (opzionale)
+	\end{lstlisting}
+	
+	\section{Configurazione e Avvio del Backend}
+	
+	\subsection{Passo 1: Crea il file app.py}
+	
+	Crea un nuovo file chiamato \texttt{app.py} e copia il seguente codice:
+	
+	\begin{lstlisting}[language=Python]
+		"""
+		API Flask per Predizione Rischio Cardiovascolare
+		"""
+		
+		from flask import Flask, request, jsonify
+		from flask_cors import CORS
+		import pandas as pd
+		from sklearn.model_selection import train_test_split
+		from sklearn.preprocessing import StandardScaler
+		from sklearn.linear_model import LogisticRegression
+		
+		app = Flask(__name__)
+		CORS(app)
+		
+		print("Caricamento del modello...")
+		
+		url = "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data"
+		
+		colonne = [
+		'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs',
+		'restecg', 'thalach', 'exang', 'oldpeak',
+		'slope', 'ca', 'thal', 'target'
+		]
+		
+		df = pd.read_csv(url, names=colonne, na_values='?')
+		df = df.dropna()
+		df['target'] = (df['target'] > 0).astype(int)
+		
+		X = df.drop('target', axis=1)
+		y = df['target']
+		
+		X_train, X_test, y_train, y_test = train_test_split(
+		X, y, test_size=0.2, random_state=42, stratify=y
+		)
+		
+		scaler = StandardScaler()
+		X_train = scaler.fit_transform(X_train)
+		X_test = scaler.transform(X_test)
+		
+		model = LogisticRegression(max_iter=1000)
+		model.fit(X_train, y_train)
+		
+		print("Modello addestrato e pronto!")
+		
+		@app.route('/predict', methods=['POST'])
+		def predict():
+		try:
+		data = request.json
+		
+		paziente = pd.DataFrame([{
+			'age': data['age'],
+			'sex': data['sex'],
+			'cp': data['cp'],
+			'trestbps': data['trestbps'],
+			'chol': data['chol'],
+			'fbs': data['fbs'],
+			'restecg': data['restecg'],
+			'thalach': data['thalach'],
+			'exang': data['exang'],
+			'oldpeak': data['oldpeak'],
+			'slope': data['slope'],
+			'ca': data['ca'],
+			'thal': data['thal']
+		}])
+		
+		paziente_scaled = scaler.transform(paziente)
+		
+		predizione = model.predict(paziente_scaled)[0]
+		probabilita = model.predict_proba(paziente_scaled)[0][1]
+		
+		return jsonify({
+			'prediction': int(predizione),
+			'probability': float(probabilita),
+			'risk': 'high' if predizione == 1 else 'low',
+			'message': 'A RISCHIO' if predizione == 1 else 'SANO'
+		})
+		
+		except Exception as e:
+		return jsonify({'error': str(e)}), 400
+		
+		@app.route('/health', methods=['GET'])
+		def health():
+		return jsonify({'status': 'ok', 'model': 'Logistic Regression'})
+		
+		if __name__ == '__main__':
+		app.run(debug=True, port=5000)
+	\end{lstlisting}
+	
+	\subsection{Passo 2: Avvia il server}
+	
+	Nel terminale, dalla cartella del progetto, esegui:
+	
+	\begin{lstlisting}[language=bash]
+		python app.py
+	\end{lstlisting}
+	
+	\begin{successbox}
+		\textbf{Output atteso:}
+		\begin{lstlisting}
+			Caricamento del modello...
+			Modello addestrato e pronto!
+			* Running on http://127.0.0.1:5000
+			* Restarting with stat
+			* Debugger is active!
+		\end{lstlisting}
+	\end{successbox}
+	
+	\section{Configurazione e Avvio del Frontend}
+	
+	\subsection{Passo 1: Crea il file index.html}
+	
+	Il codice HTML completo è già stato fornito. Salvalo come \texttt{index.html} nella stessa cartella del progetto.
+	
+	\subsection{Passo 2: Apri il file HTML}
+	
+	\begin{itemize}
+		\item Fai doppio clic su \texttt{index.html}
+		\item Oppure aprilo con il browser (File → Apri File)
+	\end{itemize}
+	
+	\section{Test del Sistema}
+	
+	\subsection{Test Rapido con Dati Precompilati}
+	
+	\begin{enumerate}
+		\item Il form è già precompilato con i dati di un paziente di esempio
+		\item Clicca direttamente su \textbf{``Calcola Rischio''}
+		\item Dovresti vedere il risultato della predizione con la probabilità
+	\end{enumerate}
+	
+	\subsection{Parametri del Paziente di Esempio}
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{|l|l|l|}
+			\hline
+			\textbf{Parametro} & \textbf{Valore} & \textbf{Descrizione} \\
+			\hline
+			Età & 60 & Anni \\
+			\hline
+			Sesso & Maschile & 1 = M, 0 = F \\
+			\hline
+			Tipo Dolore Toracico & Angina Tipica & 0-3 \\
+			\hline
+			Pressione Riposo & 150 & mm Hg \\
+			\hline
+			Colesterolo & 250 & mg/dl \\
+			\hline
+			Glicemia Digiuno & Sì (maggiore 120) & 1 = Sì, 0 = No \\
+			\hline
+			FC Massima & 130 & battiti/min \\
+			\hline
+			Oldpeak & 2.3 & Depressione ST \\
+			\hline
+		\end{tabular}
+		\caption{Parametri paziente di test}
+	\end{table}
+	
+	\section{Risoluzione Problemi Comuni}
+	
+	\subsection{Problema 1: Errore di connessione al server}
+	
+	\begin{warningbox}
+		\textbf{Errore:} ``Assicurati che il server Python sia in esecuzione''
+		
+		\textbf{Soluzione:}
+		\begin{itemize}
+			\item Verifica che il server Flask sia avviato (controlla il terminale)
+			\item Assicurati che sia in esecuzione su \texttt{http://localhost:5000}
+			\item Se usi una porta diversa, modifica \texttt{API\_URL} nell'HTML
+		\end{itemize}
+	\end{warningbox}
+	
+	\subsection{Problema 2: Modulo non trovato}
+	
+	\begin{warningbox}
+		\textbf{Errore:} ``ModuleNotFoundError: No module named 'flask'''
+		
+		\textbf{Soluzione:}
+		\begin{lstlisting}[language=bash]
+			pip install flask flask-cors pandas scikit-learn
+		\end{lstlisting}
+	\end{warningbox}
+	
+	\subsection{Problema 3: Errore CORS nel browser}
+	
+	\begin{warningbox}
+		\textbf{Soluzione:}
+		\begin{itemize}
+			\item Verifica che \texttt{flask-cors} sia installato
+			\item Controlla che \texttt{CORS(app)} sia presente in app.py
+		\end{itemize}
+	\end{warningbox}
+	
+	\subsection{Problema 4: Porta occupata}
+	
+	\begin{warningbox}
+		\textbf{Soluzione:}
+		
+		La porta 5000 potrebbe essere occupata. Modifica la porta in app.py:
+		
+		\begin{lstlisting}[language=Python]
+			app.run(debug=True, port=5001)  # Usa 5001 invece di 5000
+		\end{lstlisting}
+		
+		E aggiorna l'URL nell'HTML:
+		
+		\begin{lstlisting}
+			const API_URL = 'http://localhost:5001/predict';
+		\end{lstlisting}
+	\end{warningbox}
+	
+	\section{Informazioni sul Modello}
+	
+	\begin{infobox}
+		\subsection*{Algoritmo Utilizzato}
+		\textbf{Regressione Logistica} - Un algoritmo di classificazione binaria che stima la probabilità che un paziente sia a rischio di malattia cardiovascolare.
+		
+		\subsection*{Dataset}
+		UCI Machine Learning Repository - Cleveland Heart Disease Database
+		
+		297 pazienti dopo la pulizia dei dati mancanti
+		
+		\subsection*{Preprocessing}
+		\begin{itemize}
+			\item Standardizzazione delle feature (media=0, std=1)
+			\item Rimozione valori mancanti
+			\item Split 80/20 train/test stratificato
+		\end{itemize}
+	\end{infobox}
+	
+	\section{Utilizzo del Sistema}
+	
+	\begin{enumerate}
+		\item Inserisci i dati clinici del paziente nel form
+		\item Clicca su ``Calcola Rischio''
+		\item Il sistema mostrerà:
+		\begin{itemize}
+			\item Classificazione: A RISCHIO o SANO
+			\item Probabilità in percentuale
+			\item Raccomandazioni cliniche
+		\end{itemize}
+	\end{enumerate}
+	
+	\vspace{1cm}
+	
+	\begin{center}
+		\rule{\textwidth}{0.4pt}
+		
+		\vspace{0.5cm}
+		
+		\textbf{Sistema di Predizione del Rischio Cardiovascolare}
+		
+		Basato su Machine Learning con Regressione Logistica
+		
+		Per supporto tecnico o domande, consultare la documentazione di scikit-learn e Flask
+		
+	\end{center}
+	
+\end{document}
