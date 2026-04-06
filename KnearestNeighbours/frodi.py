@@ -76,7 +76,7 @@ def valuta_modello(X_train, y_train, X_test, y_test, k):
     return corrette / len(X_test)
 
 # -------------------------------
-# MAIN
+# MAIN 
 # -------------------------------
 X, y = genera_dati()
 
