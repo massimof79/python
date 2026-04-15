@@ -55,20 +55,33 @@ def distanza_euclidea(a, b):
 # --- 4. Previsione KNN per un singolo punto ---
 
 def knn_predict(X_train, y_train, x_new, k):
-    distanze = [distanza_euclidea(x_new, x) for x in X_train]
-    indici_vicini = np.argsort(distanze)[:k]
+    distanze = [distanza_euclidea(x_new, x) for x in X_train]  #Calcola la distanza tra il punto nuovo e tutti i punti del training
+    indici_vicini = np.argsort(distanze)[:k] #Argsort restituisce la sequenza degli indici che ordinerebbero l'array, :k seleziona i primi due elementi della sequenza di indici restituita
     etichette_vicini = y_train[indici_vicini]
-    valori, conteggi = np.unique(etichette_vicini, return_counts=True)
-    return valori[np.argmax(conteggi)]
+    valori, conteggi = np.unique(etichette_vicini, return_counts=True)#restituisce i valori distinti nell'array e per ogni valore quante volte compare
+    return valori[np.argmax(conteggi)] #restituisce la classe più frequente tra i vicini
 
 
 # --- 5. Valutazione del modello ---
 
 def valuta_modello(X_train, y_train, X_test, y_test, k):
     previsioni = [knn_predict(X_train, y_train, x, k) for x in X_test]
+    '''Per ogni elemento x nel test set:
+applica knn_predict
+ottiene una previsione
+Il risultato è una lista di predizioni'''
     corretti = sum(p == v for p, v in zip(previsioni, y_test))
     return corretti / len(y_test)
 
+
+'''
+zip(previsioni, y_test) accoppia:
+previsione (p)
+valore reale (v)
+p == v restituisce:
+True (1) se corretto
+False (0) se errato
+sum(...) conta quante previsioni sono corrette'''
 
 # --- Programma principale ---
 

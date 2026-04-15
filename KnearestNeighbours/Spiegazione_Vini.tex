@@ -1,0 +1,261 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[italian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\title{Implementazione e Analisi dell'Algoritmo KNN in Python}
+\author{}
+\date{}
+
+\lstset{
+	language=Python,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{blue},
+	commentstyle=\color{gray},
+	showstringspaces=false
+}
+
+\begin{document}
+	
+	\maketitle
+	
+	\section{Introduzione}
+	
+	Il programma implementa un classificatore K-Nearest Neighbors (KNN) per prevedere la qualità del vino a partire da caratteristiche chimiche.
+	
+	Le fasi principali sono:
+	\begin{enumerate}
+		\item Caricamento dati
+		\item Suddivisione train/test
+		\item Normalizzazione
+		\item Calcolo distanze
+		\item Classificazione
+		\item Valutazione
+	\end{enumerate}
+	
+	---
+	
+	\section{Caricamento dei dati}
+	
+	\begin{lstlisting}
+		def carica_dati(percorso):
+		df = pd.read_csv(percorso, sep=";")
+		X = df.drop(columns="quality").values
+		y = df["quality"].values
+		return X, y
+	\end{lstlisting}
+	
+	Separa:
+	\[
+	X = \text{feature}, \quad y = \text{target}
+	\]
+	
+	---
+	
+	\section{Normalizzazione Min-Max}
+	
+	\begin{lstlisting}
+		def normalizza(X_train, X_test):
+		X_min = X_train.min(axis=0)
+		X_max = X_train.max(axis=0)
+		X_train_norm = (X_train - X_min) / (X_max - X_min)
+		X_test_norm  = (X_test  - X_min) / (X_max - X_min)
+		return X_train_norm, X_test_norm
+	\end{lstlisting}
+	
+	\subsection{Formula}
+	
+	\[
+	x_{norm} = \frac{x - x_{min}}{x_{max} - x_{min}}
+	\]
+	
+	\subsection{Esempio}
+	
+	\[
+	X_{train} =
+	\begin{bmatrix}
+		4 & 10 \\
+		6 & 20 \\
+		8 & 30
+	\end{bmatrix}
+	\]
+	
+	\[
+	X_{train}^{norm} =
+	\begin{bmatrix}
+		0 & 0 \\
+		0.5 & 0.5 \\
+		1 & 1
+	\end{bmatrix}
+	\]
+	
+	---
+	
+	\section{Distanza euclidea}
+	
+	\begin{lstlisting}
+		def distanza_euclidea(a, b):
+		return np.sqrt(np.sum((a - b) ** 2))
+	\end{lstlisting}
+	
+	\[
+	d(a,b) = \sqrt{\sum (a_i - b_i)^2}
+	\]
+	
+	\subsection{Esempio}
+	
+	\[
+	a = [0,0], \quad b = [1,1]
+	\]
+	
+	\[
+	d = \sqrt{2}
+	\]
+	
+	---
+	
+	\section{Algoritmo KNN}
+	
+	\begin{lstlisting}
+		def knn_predict(X_train, y_train, x_new, k):
+		distanze = [distanza_euclidea(x_new, x) for x in X_train]
+		indici_vicini = np.argsort(distanze)[:k]
+		etichette_vicini = y_train[indici_vicini]
+		valori, conteggi = np.unique(etichette_vicini, return_counts=True)
+		return valori[np.argmax(conteggi)]
+	\end{lstlisting}
+	
+	---
+	
+	\subsection{Esempio completo}
+	
+	\[
+	X_{train} =
+	\begin{bmatrix}
+		1 & 1 \\
+		2 & 2 \\
+		3 & 3 \\
+		6 & 6
+	\end{bmatrix}
+	\quad
+	y_{train} = [0,0,1,1]
+	\]
+	
+	\[
+	x_{new} = [2.5,2.5], \quad k=3
+	\]
+	
+	\subsubsection{Distanze}
+	
+	\[
+	d = [2.12, 0.71, 0.71, 4.95]
+	\]
+	
+	\subsubsection{Ordinamento}
+	
+	\[
+	\text{argsort} = [1,2,0,3]
+	\]
+	
+	\subsubsection{Vicini}
+	
+	\[
+	[1,2,0]
+	\]
+	
+	\subsubsection{Etichette}
+	
+	\[
+	[0,1,0]
+	\]
+	
+	\subsubsection{Conteggi}
+	
+	\[
+	valori = [0,1], \quad conteggi = [2,1]
+	\]
+	
+	\subsubsection{Risultato}
+	
+	\[
+	\boxed{0}
+	\]
+	
+	---
+	
+	\section{Valutazione del modello}
+	
+	\begin{lstlisting}
+		previsioni = [knn_predict(X_train, y_train, x, k) for x in X_test]
+		corretti = sum(p == v for p, v in zip(previsioni, y_test))
+		return corretti / len(y_test)
+	\end{lstlisting}
+	
+	---
+	
+	\subsection{Spiegazione}
+	
+	\begin{itemize}
+		\item Genera tutte le previsioni
+		\item Confronta con i valori reali
+		\item Conta quelle corrette
+		\item Calcola l’accuratezza
+	\end{itemize}
+	
+	---
+	
+	\subsection{Esempio}
+	
+	\[
+	y_{test} = [1,0,1,1,0]
+	\]
+	
+	\[
+	previsioni = [1,1,1,0,0]
+	\]
+	
+	\[
+	[True, False, True, False, True]
+	\]
+	
+	\[
+	corretti = 3
+	\]
+	
+	\[
+	\text{accuratezza} = \frac{3}{5} = 0.6
+	\]
+	
+	---
+	
+	\section{Scelta del parametro K}
+	
+	\[
+	K = [1,3,5,7,9]
+	\]
+	
+	\begin{itemize}
+		\item K piccolo → overfitting
+		\item K grande → underfitting
+	\end{itemize}
+	
+	---
+	
+	\section{Conclusione}
+	
+	Il programma implementa correttamente un modello KNN completo:
+	
+	\begin{itemize}
+		\item preprocessing corretto
+		\item distanza euclidea
+		\item classificazione per maggioranza
+		\item valutazione quantitativa
+	\end{itemize}
+	
+	La normalizzazione è il passaggio più critico per garantire correttezza geometrica del modello.
+	
+\end{document}

@@ -2,7 +2,9 @@
 
 ## Contesto
 
-Un'azienda vinicola della Toscana vuole automatizzare la valutazione preliminare dei propri vini rossi. Ogni anno, i tecnici analizzano campioni di vino misurando alcune proprietà chimiche e assegnano un punteggio di qualità da 1 a 10. L'azienda vorrebbe usare questi dati storici per prevedere automaticamente la qualità di nuovi campioni, riducendo i tempi e i costi di analisi.
+Un'azienda vinicola della Toscana vuole automatizzare la valutazione preliminare dei propri vini rossi. 
+Ogni anno, i tecnici analizzano campioni di vino misurando alcune proprietà chimiche e assegnano un punteggio di qualità da 1 a 10. 
+L'azienda vorrebbe usare questi dati storici per prevedere automaticamente la qualità di nuovi campioni, riducendo i tempi e i costi di analisi.
 
 Il dataset utilizzato è il celebre *Wine Quality Dataset* (Cortez et al., 2009), disponibile pubblicamente sul repository UCI Machine Learning Repository all'indirizzo:
 
@@ -14,8 +16,8 @@ Il file è in formato CSV con separatore `;` e contiene 1599 campioni di vino ro
 
 Le variabili sono:
 
-| Variabile | Descrizione |
-|---|---|
+| Variabile       | Descrizione |
+|-----------------|-------------|
 | `fixed acidity` | Acidità fissa (g/dm³) |
 | `volatile acidity` | Acidità volatile (g/dm³) |
 | `citric acid` | Acido citrico (g/dm³) |
@@ -31,13 +33,11 @@ Le variabili sono:
 
 ---
 
-## Obiettivo
-
 Scrivere un programma Python che:
 
 1. Carichi il dataset
 2. Divida i dati in insieme di addestramento (80%) e insieme di test (20%)
-3. Implementi **da zero** un classificatore K-Nearest Neighbors — senza usare la classe `KNeighborsClassifier` di scikit-learn — che preveda la qualità del vino
+3. Implementi un classificatore K-Nearest Neighbors
 4. Valuti le prestazioni del modello sull'insieme di test
 5. Ripeta la valutazione per K ∈ {1, 3, 5, 7, 9} e individui il valore di K migliore
 
