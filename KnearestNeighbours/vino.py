@@ -39,8 +39,10 @@ def carica_dati(percorso):
 # --- 2. Normalizzazione min-max ---
 
 def normalizza(X_train, X_test):
+    #Ricava il valore minimo e massimo per applicare la formula della normalizzazione
     X_min = X_train.min(axis=0)
     X_max = X_train.max(axis=0)
+    
     X_train_norm = (X_train - X_min) / (X_max - X_min)
     X_test_norm  = (X_test  - X_min) / (X_max - X_min)
     return X_train_norm, X_test_norm
@@ -111,16 +113,43 @@ for k in valori_k:
     print(f"{k:>2} | {acc:.4f}")
 
 # Grafico
+import matplotlib.pyplot as plt  # Importa la libreria per la visualizzazione grafica
+
+# Crea una nuova figura con dimensioni specifiche (larghezza=7, altezza=4 pollici)
 plt.figure(figsize=(7, 4))
+
+# Traccia il grafico dell'accuratezza al variare di K
+# - valori_k: valori sull'asse X (numero di vicini nel KNN)
+# - accuratezze: valori sull'asse Y (performance del modello)
+# - marker="o": evidenzia ogni punto con un cerchietto
+# - color="steelblue": imposta il colore della linea
+# - linewidth=2: aumenta lo spessore della linea
+
 plt.plot(valori_k, accuratezze, marker="o", color="steelblue", linewidth=2)
+# Imposta il titolo del grafico
 plt.title("Accuratezza del modello KNN al variare di K")
+
+# Etichetta dell'asse X
 plt.xlabel("Valore di K")
+# Etichetta dell'asse Y
 plt.ylabel("Accuratezza")
+# Mostra tutti i valori di K come tacche sull'asse X
 plt.xticks(valori_k)
+# Aggiunge una griglia al grafico
+# - linestyle="--": linea tratteggiata
+# - alpha=0.5: trasparenza della griglia
 plt.grid(True, linestyle="--", alpha=0.5)
+
+# Ottimizza automaticamente gli spazi per evitare sovrapposizioni
 plt.tight_layout()
+
+# Salva il grafico su file PNG
 plt.savefig("risultati_knn.png")
+
+# Mostra il grafico a schermo
 plt.show()
+
+# Stampa un messaggio di conferma del salvataggio
 print("\nGrafico salvato in: risultati_knn.png")
 
 # --- Previsioni su nuovi campioni ---
